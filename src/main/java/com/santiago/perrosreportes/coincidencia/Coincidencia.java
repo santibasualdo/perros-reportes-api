@@ -7,6 +7,8 @@ import com.santiago.perrosreportes.reporte.Reporte;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,8 +42,9 @@ public class Coincidencia {
     @Column(name = "puntaje_total", nullable = false)
     private Double puntajeTotal;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
-    private String estado;
+    private EstadoCoincidencia estado;
 
     @Column(name = "creado_en", insertable = false, updatable = false)
     private OffsetDateTime creadoEn;
@@ -93,11 +96,11 @@ public class Coincidencia {
         this.puntajeTotal = puntajeTotal;
     }
 
-    public String getEstado() {
+    public EstadoCoincidencia getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoCoincidencia estado) {
         this.estado = estado;
     }
 

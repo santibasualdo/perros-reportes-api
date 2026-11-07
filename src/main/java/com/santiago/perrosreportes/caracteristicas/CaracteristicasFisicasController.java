@@ -37,7 +37,7 @@ public class CaracteristicasFisicasController {
     }
 
     @GetMapping("/{idReporte}/caracteristicas")
-    public CaracteristicasFisicas buscarPorIdReporte(@PathVariable UUID idReporte) {
+    public CaracteristicasFisicasResponse buscarPorIdReporte(@PathVariable UUID idReporte) {
         return caracteristicasService.buscarPorIdReporte(idReporte);
     }
 }

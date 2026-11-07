@@ -53,10 +53,16 @@ public class CaracteristicasFisicasService {
         return caracteristicasRepository.save(caracteristicas);
     }
 
-    public CaracteristicasFisicas buscarPorIdReporte(UUID idReporte) {
-        return caracteristicasRepository.findById(idReporte)
+    public CaracteristicasFisicasResponse buscarPorIdReporte(UUID idReporte) {
+        CaracteristicasFisicas caracteristicas = caracteristicasRepository.findById(idReporte)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Características físicas no encontradas"));
+
+        return new CaracteristicasFisicasResponse(caracteristicas.getTamano(),
+                caracteristicas.getColor(),
+                caracteristicas.getRaza(),
+                caracteristicas.getSexo(),
+                caracteristicas.getSenasParticulares());
     }
 }
