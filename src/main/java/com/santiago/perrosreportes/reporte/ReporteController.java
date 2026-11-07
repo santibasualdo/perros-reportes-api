@@ -41,7 +41,7 @@ public class ReporteController {
     }
 
     @GetMapping("/{idReporte}")
-    public Reporte buscarPorId(@PathVariable UUID idReporte) {
-        return reporteService.buscarPorId(idReporte);
+    public ReporteDetalleResponse buscarPorId(@PathVariable UUID idReporte) {
+        return reporteService.buscarDetallePorId(idReporte);
     }
 }

@@ -1,4 +1,4 @@
-package com.santiago.perrosreportes.reporte.caracteristicas;
+package com.santiago.perrosreportes.caracteristicas;
 
 public enum SexoPerro {
     MACHO,

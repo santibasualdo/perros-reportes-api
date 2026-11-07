@@ -1,4 +1,4 @@
-package com.santiago.perrosreportes.reporte.ubicacion;
+package com.santiago.perrosreportes.ubicacion;
 
 import java.util.UUID;
 

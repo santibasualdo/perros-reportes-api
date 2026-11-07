@@ -3,6 +3,15 @@ package com.santiago.perrosreportes.reporte;
 import java.util.List;
 import java.util.UUID;
 
+import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicas;
+import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicasRepository;
+import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicasResponse;
+import com.santiago.perrosreportes.fotografia.FotografiaResponse;
+import com.santiago.perrosreportes.fotografia.FotografiaService;
+import com.santiago.perrosreportes.ubicacion.Ubicacion;
+import com.santiago.perrosreportes.ubicacion.UbicacionRepository;
+import com.santiago.perrosreportes.ubicacion.UbicacionResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -11,9 +20,18 @@ import org.springframework.web.server.ResponseStatusException;
 public class ReporteService {
 
     private final ReporteRepository reporteRepository;
+    private final UbicacionRepository ubicacionRepository;
+    private final CaracteristicasFisicasRepository caracteristicasRepository;
+    private final FotografiaService fotografiaService;
 
-    public ReporteService(ReporteRepository reporteRepository) {
+    public ReporteService(ReporteRepository reporteRepository,
+            UbicacionRepository ubicacionRepository,
+            CaracteristicasFisicasRepository caracteristicasRepository,
+            FotografiaService fotografiaService) {
         this.reporteRepository = reporteRepository;
+        this.ubicacionRepository = ubicacionRepository;
+        this.caracteristicasRepository = caracteristicasRepository;
+        this.fotografiaService = fotografiaService;
     }
 
     public Reporte crear(CrearReporteRequest datos, UUID idUsuario) {
@@ -37,5 +55,43 @@ public class ReporteService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Reporte no encontrado"));
+    }
+
+    public ReporteDetalleResponse buscarDetallePorId(UUID idReporte) {
+        Reporte reporte = buscarPorId(idReporte);
+
+        Ubicacion ubicacion = ubicacionRepository.findById(idReporte).orElse(null);
+        UbicacionResponse ubicacionResponse = null;
+
+        if (ubicacion != null) {
+            ubicacionResponse = new UbicacionResponse(ubicacion.getLatitud(),
+                    ubicacion.getLongitud(),
+                    ubicacion.getDireccion());
+        }
+
+        CaracteristicasFisicas caracteristicas = caracteristicasRepository.findById(idReporte).orElse(null);
+        CaracteristicasFisicasResponse caracteristicasResponse = null;
+
+        if (caracteristicas != null) {
+            caracteristicasResponse = new CaracteristicasFisicasResponse(caracteristicas.getTamano(),
+                    caracteristicas.getColor(),
+                    caracteristicas.getRaza(),
+                    caracteristicas.getSexo(),
+                    caracteristicas.getSenasParticulares());
+        }
+
+        List<FotografiaResponse> fotografias = fotografiaService.listarPorReporte(idReporte);
+
+        return new ReporteDetalleResponse(reporte.getIdReporte(),
+                reporte.getIdUsuario(),
+                reporte.getTipo(),
+                reporte.getNombre(),
+                reporte.getDescripcion(),
+                reporte.getFechaHora(),
+                reporte.getEstado(),
+                reporte.getCreadoEn(),
+                ubicacionResponse,
+                caracteristicasResponse,
+                fotografias);
     }
 }
