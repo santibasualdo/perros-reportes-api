@@ -2,6 +2,8 @@ package com.santiago.perrosreportes.conversacion;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.santiago.perrosreportes.coincidencia.Coincidencia;
@@ -40,32 +42,45 @@ public class MensajeService {
     public MensajeResponse enviarMensaje(UUID idCoincidencia, UUID idUsuario,
             EnviarMensajeRequest datos) {
         Coincidencia coincidencia = obtenerCoincidenciaConfirmada(idCoincidencia);
-        verificarUsuarioEsPropietario(coincidencia, idUsuario);
-
-        Usuario usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Usuario no encontrado"));
+        Usuario usuario = obtenerUsuarioPropietario(coincidencia, idUsuario);
 
         Conversacion conversacion = obtenerOCrearConversacion(coincidencia);
         verificarConversacionActiva(conversacion);
-
-        boolean esParticipante = participanteConversacionRepository
-                .existsByConversacion_IdConversacionAndUsuario_IdUsuario(
-                        conversacion.getIdConversacion(),
-                        idUsuario);
-
-        if (!esParticipante) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "No participás en esta conversación");
-        }
+        verificarUsuarioEsParticipante(conversacion, idUsuario);
 
         Mensaje mensajeGuardado = guardarMensaje(conversacion, usuario, datos);
 
         return convertirAResponse(mensajeGuardado);
     }
 
+    @Transactional(readOnly = true)
+    public List<MensajeResponse> listarMensajes(UUID idCoincidencia, UUID idUsuario) {
+        Coincidencia coincidencia = obtenerCoincidenciaConfirmada(idCoincidencia);
+        verificarUsuarioEsPropietario(coincidencia, idUsuario);
+
+        Conversacion conversacion = conversacionRepository
+                .findByCoincidencia_IdCoincidencia(idCoincidencia)
+                .orElse(null);
+
+        if (conversacion == null) {
+            return List.of();
+        }
+
+        verificarUsuarioEsParticipante(conversacion, idUsuario);
+
+        List<Mensaje> mensajes = mensajeRepository
+                .findByConversacion_IdConversacionOrderByFechaHoraAsc(
+                        conversacion.getIdConversacion());
+        List<MensajeResponse> respuestas = new ArrayList<>();
+
+        for (Mensaje mensaje : mensajes) {
+            respuestas.add(convertirAResponse(mensaje));
+        }
+
+        return respuestas;
+    }
+
+    // Verifica y devuelve la coincidencia si esta confirmada
     private Coincidencia obtenerCoincidenciaConfirmada(UUID idCoincidencia) {
         Coincidencia coincidencia = coincidenciaRepository.findById(idCoincidencia)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -75,12 +90,14 @@ public class MensajeService {
         if (coincidencia.getEstado() != EstadoCoincidencia.CONFIRMADA) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Solo se pueden enviar mensajes en coincidencias confirmadas");
+                    "Solo se puede acceder a mensajes de coincidencias confirmadas");
         }
 
         return coincidencia;
     }
 
+
+    // Comprueba que el usuario es propietaro de alguno de los reportes
     private void verificarUsuarioEsPropietario(Coincidencia coincidencia, UUID idUsuario) {
         boolean esPropietarioReportePerdido = coincidencia.getReportePerdido().getIdUsuario().equals(idUsuario);
         boolean esPropietarioReporteAvistamiento = coincidencia.getReporteAvistamiento().getIdUsuario().equals(idUsuario);
@@ -92,6 +109,17 @@ public class MensajeService {
         }
     }
 
+    // Busca y devuelve el usuario propietario de algun reporte
+    private Usuario obtenerUsuarioPropietario(Coincidencia coincidencia, UUID idUsuario) {
+        verificarUsuarioEsPropietario(coincidencia, idUsuario);
+
+        return usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuario no encontrado"));
+    }
+
+    // Crea si no existe o devuelve conversacion
     private Conversacion obtenerOCrearConversacion(Coincidencia coincidencia) {
         return conversacionRepository.findByCoincidencia_IdCoincidencia(coincidencia.getIdCoincidencia())
                 .orElseGet(() -> {
@@ -106,11 +134,25 @@ public class MensajeService {
                 });
     }
 
+    // Valida si la conversacion esta activa
     private void verificarConversacionActiva(Conversacion conversacion) {
         if (!Boolean.TRUE.equals(conversacion.getActiva())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "No se pueden enviar mensajes en una conversación inactiva");
+        }
+    }
+
+    private void verificarUsuarioEsParticipante(Conversacion conversacion, UUID idUsuario) {
+        boolean esParticipante = participanteConversacionRepository
+                .existsByConversacion_IdConversacionAndUsuario_IdUsuario(
+                        conversacion.getIdConversacion(),
+                        idUsuario);
+
+        if (!esParticipante) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No participás en esta conversación");
         }
     }
 

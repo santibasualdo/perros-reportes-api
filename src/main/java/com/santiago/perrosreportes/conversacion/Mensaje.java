@@ -28,7 +28,7 @@ public class Mensaje {
     private Conversacion conversacion;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @JoinColumn(name = "id_emisor", nullable = false)
     private Usuario usuario;
 
     @Column(name = "contenido", nullable = false)
