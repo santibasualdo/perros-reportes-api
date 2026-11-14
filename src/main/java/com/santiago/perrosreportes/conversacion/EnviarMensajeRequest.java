@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 public class EnviarMensajeRequest {
 
     @NotBlank(message = "El contenido del mensaje es obligatorio")
-    @Size(max = 1000, message = "El contenido del mensaje no puede superar los 1000 caracteres")
+    @Size(max = 200, message = "El contenido del mensaje no puede superar los 200 caracteres")
     private String contenido;
 
     public EnviarMensajeRequest() {

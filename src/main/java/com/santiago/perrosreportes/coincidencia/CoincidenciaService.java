@@ -174,7 +174,7 @@ public class CoincidenciaService {
     }
 
     public CoincidenciaResponse confirmar(UUID idCoincidencia, UUID idUsuario) {
-        Coincidencia coincidencia = buscarCoincidenciaAutorizada(idCoincidencia, idUsuario);
+        Coincidencia coincidencia = buscarCoincidenciaDelPropietarioPerdido(idCoincidencia, idUsuario);
         coincidencia.setEstado(EstadoCoincidencia.CONFIRMADA);
         Coincidencia coincidenciaGuardada = coincidenciaRepository.save(coincidencia);
 
@@ -182,7 +182,7 @@ public class CoincidenciaService {
     }
 
     public CoincidenciaResponse descartar(UUID idCoincidencia, UUID idUsuario) {
-        Coincidencia coincidencia = buscarCoincidenciaAutorizada(idCoincidencia, idUsuario);
+        Coincidencia coincidencia = buscarCoincidenciaDelPropietarioPerdido(idCoincidencia, idUsuario);
         coincidencia.setEstado(EstadoCoincidencia.DESCARTADA);
         Coincidencia coincidenciaGuardada = coincidenciaRepository.save(coincidencia);
 
@@ -338,19 +338,18 @@ public class CoincidenciaService {
         return coincidencia;
     }
 
-    private Coincidencia buscarCoincidenciaAutorizada(UUID idCoincidencia, UUID idUsuario) {
+    private Coincidencia buscarCoincidenciaDelPropietarioPerdido(UUID idCoincidencia, UUID idUsuario) {
         Coincidencia coincidencia = coincidenciaRepository.findById(idCoincidencia)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Coincidencia no encontrada"));
 
         boolean esPropietarioPerdido = coincidencia.getReportePerdido().getIdUsuario().equals(idUsuario);
-        boolean esPropietarioAvistamiento = coincidencia.getReporteAvistamiento().getIdUsuario().equals(idUsuario);
 
-        if (!esPropietarioPerdido && !esPropietarioAvistamiento) {
+        if (!esPropietarioPerdido) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "No podés modificar esta coincidencia");
+                    "Solo el propietario del reporte perdido puede modificar esta coincidencia");
         }
 
         return coincidencia;
