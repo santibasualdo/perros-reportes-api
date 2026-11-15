@@ -80,6 +80,33 @@ public class MensajeService {
         return respuestas;
     }
 
+    @Transactional
+    public void marcarMensajesComoLeidos(UUID idCoincidencia, UUID idUsuario) {
+        Coincidencia coincidencia = obtenerCoincidenciaConfirmada(idCoincidencia);
+        verificarUsuarioEsPropietario(coincidencia, idUsuario);
+
+        Conversacion conversacion = conversacionRepository
+                .findByCoincidencia_IdCoincidencia(idCoincidencia)
+                .orElse(null);
+
+        if (conversacion == null) {
+            return;
+        }
+
+        verificarUsuarioEsParticipante(conversacion, idUsuario);
+
+        List<Mensaje> mensajesNoLeidos = mensajeRepository
+                .findByConversacion_IdConversacionAndUsuario_IdUsuarioNotAndLeidoFalse(
+                        conversacion.getIdConversacion(),
+                        idUsuario);
+
+        for (Mensaje mensaje : mensajesNoLeidos) {
+            mensaje.setLeido(true);
+        }
+
+        mensajeRepository.saveAll(mensajesNoLeidos);
+    }
+
     // Verifica y devuelve la coincidencia si esta confirmada
     private Coincidencia obtenerCoincidenciaConfirmada(UUID idCoincidencia) {
         Coincidencia coincidencia = coincidenciaRepository.findById(idCoincidencia)

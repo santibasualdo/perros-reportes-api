@@ -8,4 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MensajeRepository extends JpaRepository<Mensaje, UUID> {
 
     List<Mensaje> findByConversacion_IdConversacionOrderByFechaHoraAsc(UUID idConversacion);
+
+    List<Mensaje> findByConversacion_IdConversacionAndUsuario_IdUsuarioNotAndLeidoFalse(UUID idConversacion,
+            UUID idUsuario);
 }
