@@ -51,6 +51,7 @@ export default function RootLayout() {
           <Stack.Screen name="registro" options={{ headerShown: false }} />
           <Stack.Screen name="coincidencias" options={{ headerShown: false }} />
           <Stack.Screen name="coincidencias/[idReporte]" options={{ headerShown: false }} />
+          <Stack.Screen name="conversaciones" options={{ headerShown: false }} />
           <Stack.Screen name="conversaciones/[idCoincidencia]" options={{ headerShown: false }} />
           <Stack.Screen name="perfil" options={{ headerShown: false }} />
           <Stack.Screen name="reportes/nuevo" options={{ headerShown: false }} />

@@ -76,7 +76,9 @@ public class SupabaseStorageService {
             throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "La fotografía no puede superar 5 MB");
         }
 
-        if (!TIPOS_PERMITIDOS.contains(archivo.getContentType())) {
+        String tipoContenido = archivo.getContentType();
+
+        if (tipoContenido == null || !TIPOS_PERMITIDOS.contains(tipoContenido)) {
             throw new ResponseStatusException(
                     HttpStatus.UNSUPPORTED_MEDIA_TYPE,
                     "La fotografía debe ser JPEG, PNG o WebP");

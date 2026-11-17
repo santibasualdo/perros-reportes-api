@@ -2,7 +2,7 @@
 
 > Documento de continuidad para otros chats o desarrolladores. Describe el objetivo, las decisiones tomadas, el código implementado y el punto exacto en el que quedó el desarrollo.
 >
-> Última actualización: 15 de noviembre de 2026.
+> Última actualización: 16 de noviembre de 2026.
 
 ## 1. Objetivo del TFG
 
@@ -36,7 +36,7 @@ La prioridad es conseguir una demo funcional del flujo principal. No se busca to
 Ruta local:
 
 ```text
-E:\Proyectos\Tesis\perros-reportes-api
+E:\Proyectos\Tesis\App\perros-reportes-api
 ```
 
 Paquete raíz:
@@ -51,13 +51,16 @@ Clase principal:
 src/main/java/com/santiago/perrosreportes/PerrosReportesApiApplication.java
 ```
 
-### Frontend previsto
+### Frontend
 
-- Expo / React Native.
-- TypeScript.
-- Todavía no forma parte de este repositorio.
-- Para la demo se priorizará que el flujo sea funcional: pantallas simples, pocos botones, navegación directa y sin animaciones.
-- No se busca todavía un diseño visual elaborado; solamente estados básicos de carga, error y listas vacías.
+- Expo / React Native con TypeScript y Expo Router.
+- Ruta local: `E:\Proyectos\Tesis\App\perros-reportes-api\frontend`.
+- Se inicia desde esa carpeta con `npm start`.
+- Usa Supabase Auth en el cliente y el JWT para llamar al backend.
+- Para la demo se prioriza un flujo funcional: pantallas simples, pocos botones,
+  navegación directa y sin animaciones complejas.
+- `DISENO_APP.md` guarda las decisiones visuales, ideas futuras y referencias de
+  diseño. No implementa automáticamente sus sugerencias.
 
 ### Supabase
 
@@ -89,6 +92,7 @@ Nunca se deben escribir en Git, mostrar en una respuesta o enviar al frontend:
 - Generación básica de coincidencias mediante datos estructurados.
 - Consulta, confirmación y descarte de coincidencias.
 - Mensajería entre usuarios relacionados con una coincidencia.
+- Frontend móvil para autenticación, reportes, mapa y coincidencias.
 
 ### Fuera de alcance por ahora
 
@@ -160,7 +164,7 @@ application-local.properties
 Desde PowerShell:
 
 ```powershell
-cd E:\Proyectos\Tesis\perros-reportes-api
+cd E:\Proyectos\Tesis\App\perros-reportes-api
 mvn clean test
 mvn spring-boot:run
 ```
@@ -418,6 +422,17 @@ Actualmente responde solamente el ID del usuario autenticado:
 
 Devuelve todos los reportes. Actualmente no filtra por propietario, tipo, estado ni distancia.
 
+#### `GET /api/reportes/mapa`
+
+- Devuelve los datos mínimos que necesita el mapa para mostrar reportes activos.
+- La pantalla inicial de la app lo usa para crear marcadores.
+
+#### `GET /api/reportes/mios`
+
+- Devuelve únicamente los reportes del usuario autenticado.
+- La pantalla de coincidencias lo usa para que la persona elija sobre qué reporte
+  quiere consultar coincidencias.
+
 #### `GET /api/reportes/{idReporte}`
 
 Devuelve `ReporteDetalleResponse`, que combina:
@@ -625,6 +640,8 @@ El doble uso de `.body(...)` en `RestClient` cumple dos funciones distintas:
 - Prevención de duplicados antes de guardar.
 - Persistencia con estado inicial `PENDIENTE` y `similitudVisual = null`.
 - Endpoint `POST /api/reportes/{idReporte}/coincidencias`.
+- La respuesta incluye, cuando existe, la URL firmada temporal de la primera
+  fotografía de cada reporte para mostrar una miniatura en la app.
 
 ### Qué hace `buscarCandidatos`
 
@@ -696,9 +713,35 @@ Cuando se llama con el mismo ID en ambos parámetros, busca todas las coincidenc
 - La autorización usa el UUID del JWT y comprueba propiedad y participación.
 - El envío y la creación relacionada se ejecutan dentro de una transacción.
 
-## 13.2. Próximo paso exacto
+## 13.2. Estado actual del frontend
 
-El flujo principal del backend ya está completo y probado manualmente. El siguiente paso funcional es comenzar el frontend mínimo con Expo/React Native: autenticación, lista/detalle de reportes, coincidencias y conversación. No implementar todavía IA visual, `pgvector`, tiempo real ni animaciones.
+- Registro e inicio de sesión con Supabase implementados.
+- `AuthProvider` conserva la sesión y protege las pantallas que requieren inicio
+  de sesión.
+- `SafeAreaProvider` y `useSafeAreaInsets()` evitan que el contenido quede bajo
+  la barra superior o los controles de navegación del teléfono.
+- La pantalla inicial muestra un mapa de Córdoba, usa la última ubicación conocida
+  cuando está disponible y carga marcadores desde `GET /api/reportes/mapa`.
+- Se puede crear un reporte por pasos: tipo, datos básicos, ubicación,
+  características y fotografías.
+- El detalle muestra fotos en carrusel, permite ampliarlas y muestra datos,
+  características y ubicación. El botón de ubicación vuelve al mapa centrado en
+  ese reporte.
+- La pantalla de coincidencias lista los reportes propios, permite elegir uno y
+  luego muestra sus coincidencias con puntaje, distancia, estado, miniatura y
+  acceso al reporte relacionado.
+- Desde el detalle de una coincidencia pendiente, el propietario del reporte
+  perdido puede rechazar a la izquierda o confirmar a la derecha. Si está
+  confirmada, ambos participantes ven el botón `Abrir chat`.
+- Ya existe la ruta `conversaciones/[idCoincidencia]` y una pantalla base de
+  conversación. Todavía no carga ni envía mensajes reales.
+
+## 13.3. Próximo paso exacto
+
+Conectar la pantalla de conversación al backend de a un cambio pequeño: primero
+hacer el `GET /api/coincidencias/{idCoincidencia}/mensajes` y mostrar la lista.
+Después se agregará el campo para enviar con el `POST`. No implementar todavía
+tiempo real, IA visual, `pgvector` ni animaciones complejas.
 
 ## 14. Validaciones y códigos HTTP usados
 
@@ -747,6 +790,8 @@ Actualmente Spring puede responder con su JSON estándar de error, que suele inc
 - No hay endpoint para actualizar o cerrar un reporte.
 - No se elimina de Storage una fotografía si posteriormente falla el guardado de su fila en PostgreSQL.
 - No hay todavía una comprobación explícita de cantidad máxima de fotografías por reporte.
+- La pantalla de conversación del frontend todavía es una base visual: faltan la
+  carga, envío y actualización de mensajes leídos.
 
 Estas limitaciones no deben corregirse todas juntas. Se prioriza completar el flujo principal de la demo paso a paso.
 
@@ -783,6 +828,11 @@ Se verificó manualmente, principalmente con Postman:
 - Rechazo con `400` para contenido vacío o mayor a 200 caracteres.
 - Rechazo con `409` cuando la coincidencia no está confirmada.
 - Marcado como leído únicamente de los mensajes enviados por el otro participante.
+- Registro, inicio de sesión y creación del perfil interno desde un celular físico.
+- Mapa, ubicación, creación de reportes, fotografías, selección y consulta de
+  coincidencias desde el frontend.
+- Confirmación o descarte de una coincidencia y navegación a la pantalla base de
+  conversación desde el frontend.
 
 La compilación Maven pasa. También pasan cinco pruebas unitarias locales de `MensajeService`: conversación existente, creación inicial, coincidencia no confirmada, tercero no autorizado y marcado como leído.
 

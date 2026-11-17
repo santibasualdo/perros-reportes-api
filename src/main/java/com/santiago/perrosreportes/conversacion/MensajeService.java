@@ -198,6 +198,7 @@ public class MensajeService {
     private MensajeResponse convertirAResponse(Mensaje mensaje) {
         return new MensajeResponse(mensaje.getIdMensaje(),
                 mensaje.getUsuario().getIdUsuario(),
+                mensaje.getUsuario().getNombre(),
                 mensaje.getContenido(),
                 mensaje.getFechaHora(),
                 mensaje.getLeido());

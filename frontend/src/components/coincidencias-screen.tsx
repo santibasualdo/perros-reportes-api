@@ -78,16 +78,25 @@ export function CoincidenciasScreen() {
             paddingTop: 32,
           }}>
           <Text selectable style={{ color: colors.text, fontSize: 20, fontWeight: '700' }}>
-            Coincidencias
+            Tus reportes
           </Text>
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              backgroundColor: colors.tagBackground,
+              borderRadius: 999,
+              marginTop: 10,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+            }}>
+            <Text selectable style={{ color: colors.tagText, fontSize: 13, fontWeight: '600' }}>
+              Elige uno de tus reportes
+            </Text>
+          </View>
         </View>
 
         {/* Reportes del usuario */}
-        <View style={{ flex: 1, gap: 12, padding: 24 }}>
-          <Text selectable style={{ color: colors.textSecondary, fontSize: 15 }}>
-            Elige uno de tus reportes.
-          </Text>
-
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
           {cargando ? <ActivityIndicator color={colors.primary} /> : null}
 
           {error ? (
@@ -103,37 +112,35 @@ export function CoincidenciasScreen() {
           ) : null}
 
           {reportes.map((reporte) => (
-            // Cada tarjeta resume un reporte del usuario.
+            // Cada fila resume un reporte del usuario.
             <View
               key={reporte.idReporte}
               style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                borderRadius: 12,
-                borderWidth: 1,
-                gap: 14,
-                padding: 16,
+                borderBottomColor: colors.border,
+                borderBottomWidth: 1,
+                gap: 12,
+                paddingVertical: 18,
               }}>
-              <View style={{ flexDirection: 'row', gap: 12 }}>
+              <View style={{ flexDirection: 'row', gap: 14 }}>
                 {/* Primera foto del reporte */}
                 {reporte.urlFotografia ? (
                   <Image
-                    contentFit="cover"
+                    contentFit="contain"
                     source={{ uri: reporte.urlFotografia }}
-                    style={{ borderRadius: 10, height: 72, width: 72 }}
+                    style={{ backgroundColor: colors.surface, borderRadius: 12, height: 88, width: 88 }}
                   />
                 ) : (
                   <View
                     style={{
                       backgroundColor: colors.tagBackground,
-                      borderRadius: 10,
-                      height: 72,
-                      width: 72,
+                      borderRadius: 12,
+                      height: 88,
+                      width: 88,
                     }}
                   />
                 )}
 
-                <View style={{ flex: 1, gap: 6 }}>
+                <View style={{ flex: 1, gap: 5 }}>
                   <Text selectable style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
                     {reporte.nombre ?? 'Sin nombre'}
                   </Text>
@@ -176,13 +183,24 @@ export function CoincidenciasScreen() {
                   <Text selectable style={{ color: colors.textSecondary, fontSize: 14 }}>
                     {formatearFecha(reporte.fechaHora)}
                   </Text>
-                  <Text selectable style={{ color: colors.textSecondary, fontSize: 14 }}>
-                    Estado: {reporte.estado === 'ACTIVO' ? 'Activo' : reporte.estado}
-                  </Text>
+                  <View
+                    style={{
+                      alignSelf: 'flex-start',
+                      backgroundColor: colors.tagStrongBackground,
+                      borderRadius: 999,
+                      paddingHorizontal: 9,
+                      paddingVertical: 3,
+                    }}>
+                    <Text
+                      selectable
+                      style={{ color: colors.tagStrongText, fontSize: 12, fontWeight: '600' }}>
+                      {reporte.estado === 'ACTIVO' ? 'Activo' : reporte.estado}
+                    </Text>
+                  </View>
                 </View>
               </View>
 
-              {/* Boton para abrir las coincidencias de este reporte */}
+              {/* Enlace para abrir las coincidencias de este reporte */}
               <Pressable
                 accessibilityLabel={`Ver coincidencias del reporte ${reporte.nombre ?? 'sin nombre'}`}
                 accessibilityRole="button"
@@ -193,12 +211,11 @@ export function CoincidenciasScreen() {
                   })
                 }
                 style={{
-                  alignItems: 'center',
-                  backgroundColor: colors.action,
-                  borderRadius: 10,
-                  paddingVertical: 11,
+                  alignSelf: 'flex-end',
+                  paddingBottom: 2,
+                  paddingTop: 2,
                 }}>
-                <Text style={{ color: colors.onAction, fontSize: 15, fontWeight: '600' }}>
+                <Text style={{ color: colors.action, fontSize: 15, fontWeight: '700' }}>
                   Ver coincidencias
                 </Text>
               </Pressable>

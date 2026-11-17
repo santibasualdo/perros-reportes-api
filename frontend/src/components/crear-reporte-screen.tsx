@@ -7,6 +7,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import MapView, { Marker, type MapPressEvent } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BarraNavegacion } from '@/components/barra-navegacion';
 import { useAuth } from '@/components/auth-provider';
 import {
   crearCaracteristicasReporte,
@@ -367,6 +368,9 @@ export function CrearReporteScreen() {
           </Pressable>
         </View>
       </View>
+
+      {/* La barra se mantiene visible tambien al crear un reporte */}
+      <BarraNavegacion seccionActiva="crear" />
     </ScrollView>
   );
 }

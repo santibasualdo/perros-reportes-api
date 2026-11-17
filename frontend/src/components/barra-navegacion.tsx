@@ -10,7 +10,7 @@ import { Pressable, View } from 'react-native';
 import { colors } from '@/constants/colors';
 
 type BarraNavegacionProps = {
-  seccionActiva: 'inicio' | 'coincidencias' | 'perfil';
+  seccionActiva: 'inicio' | 'coincidencias' | 'crear' | 'mensajes' | 'perfil';
 };
 
 export function BarraNavegacion({ seccionActiva }: BarraNavegacionProps) {
@@ -76,17 +76,12 @@ export function BarraNavegacion({ seccionActiva }: BarraNavegacionProps) {
           </Pressable>
         </Link>
 
-        {/* Mensajes se habilitara cuando exista el listado de conversaciones */}
-        <View style={{ alignItems: 'center', height: 52, justifyContent: 'center', width: 54 }}>
-          <Host matchContents>
-            <Icon
-              contentDescription="Mensajes"
-              size={28}
-              source={ChatBubbleIcon}
-              tint={colors.textSecondary}
-            />
-          </Host>
-        </View>
+        <OpcionNavegacion
+          activa={seccionActiva === 'mensajes'}
+          etiqueta="Mensajes"
+          icono={ChatBubbleIcon}
+          ruta="/conversaciones"
+        />
         <OpcionNavegacion
           activa={seccionActiva === 'perfil'}
           etiqueta="Perfil"
@@ -107,7 +102,7 @@ function OpcionNavegacion({
   activa: boolean;
   etiqueta: string;
   icono: typeof LocationOnIcon;
-  ruta: '/' | '/coincidencias' | '/perfil';
+  ruta: '/' | '/coincidencias' | '/conversaciones' | '/perfil';
 }) {
   return (
     <Link href={ruta} replace asChild>

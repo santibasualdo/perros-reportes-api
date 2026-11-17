@@ -40,6 +40,17 @@ public class ReporteController {
         return reporteService.listar();
     }
 
+    @GetMapping("/mapa")
+    public List<ReporteMapaResponse> listarParaMapa() {
+        return reporteService.listarParaMapa();
+    }
+
+    @GetMapping("/mios")
+    public List<ReportePropioResponse> listarMios(@AuthenticationPrincipal Jwt jwt) {
+        UUID idUsuario = UUID.fromString(jwt.getSubject());
+        return reporteService.listarPorUsuario(idUsuario);
+    }
+
     @GetMapping("/{idReporte}")
     public ReporteDetalleResponse buscarPorId(@PathVariable UUID idReporte) {
         return reporteService.buscarDetallePorId(idReporte);

@@ -1,3 +1,7 @@
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
+import SearchIcon from '@expo/material-symbols/search.xml';
+import VisibilityIcon from '@expo/material-symbols/visibility.xml';
+import { Host, Icon } from '@expo/ui/jetpack-compose';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -71,20 +75,32 @@ export function CoincidenciasDetalleScreen({ idReporte }: CoincidenciasDetalleSc
       {/* Titulo de la pantalla */}
       <View
         style={{
+          alignItems: 'center',
           backgroundColor: colors.surface,
           borderBottomColor: colors.border,
           borderBottomWidth: 1,
+          flexDirection: 'row',
+          gap: 12,
           paddingBottom: 24,
           paddingHorizontal: 24,
           paddingTop: 32,
         }}>
+        <Pressable
+          accessibilityLabel="Volver a tus reportes"
+          accessibilityRole="button"
+          onPress={() => router.back()}
+          style={{ alignItems: 'center', height: 36, justifyContent: 'center', width: 28 }}>
+          <Host matchContents>
+            <Icon contentDescription="Volver" size={22} source={ArrowBackIcon} tint={colors.primary} />
+          </Host>
+        </Pressable>
         <Text selectable style={{ color: colors.text, fontSize: 20, fontWeight: '700' }}>
           Coincidencias encontradas
         </Text>
       </View>
 
       {/* Lista de coincidencias */}
-      <View style={{ flex: 1, gap: 12, padding: 24 }}>
+      <View style={{ flex: 1, paddingHorizontal: 20 }}>
         {cargando ? <ActivityIndicator color={colors.primary} /> : null}
 
         {error ? (
@@ -140,30 +156,28 @@ export function CoincidenciasDetalleScreen({ idReporte }: CoincidenciasDetalleSc
                 })
               }
               style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                borderRadius: 12,
-                borderWidth: 1,
-                padding: 16,
+                borderBottomColor: colors.border,
+                borderBottomWidth: 1,
+                paddingVertical: 18,
               }}>
-              <View style={{ alignItems: 'center', flexDirection: 'row', gap: 12 }}>
+              <View style={{ alignItems: 'center', flexDirection: 'row', gap: 16 }}>
                 {/* Foto del reporte relacionado */}
                 {urlFotografiaRelacionada ? (
                   <Image
                     accessibilityLabel="Fotografia principal del reporte relacionado"
-                    contentFit="cover"
+                    contentFit="contain"
                     source={urlFotografiaRelacionada}
-                    style={{ backgroundColor: colors.tagBackground, borderRadius: 10, height: 72, width: 72 }}
+                    style={{ backgroundColor: colors.background, borderRadius: 12, height: 112, width: 112 }}
                   />
                 ) : (
                   <View
                     style={{
                       alignItems: 'center',
                       backgroundColor: colors.tagBackground,
-                      borderRadius: 10,
-                      height: 72,
+                      borderRadius: 12,
+                      height: 112,
                       justifyContent: 'center',
-                      width: 72,
+                      width: 112,
                     }}>
                     <Text selectable style={{ color: colors.textSecondary, fontSize: 12, textAlign: 'center' }}>
                       Sin foto
@@ -171,10 +185,40 @@ export function CoincidenciasDetalleScreen({ idReporte }: CoincidenciasDetalleSc
                   </View>
                 )}
 
-                <View style={{ flex: 1, gap: 6 }}>
-                  <Text selectable style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>
-                    {tipoRelacionado}
-                  </Text>
+                <View style={{ flex: 1, gap: 8 }}>
+                  {/* Tipo del reporte relacionado */}
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      alignSelf: 'flex-start',
+                      backgroundColor:
+                        tipoRelacionado === 'Perdido' ? colors.lostBackground : colors.sightingBackground,
+                      borderColor: tipoRelacionado === 'Perdido' ? colors.lostText : colors.sightingText,
+                      borderRadius: 999,
+                      borderWidth: 1,
+                      flexDirection: 'row',
+                      gap: 4,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                    }}>
+                    <Host matchContents>
+                      <Icon
+                        contentDescription={tipoRelacionado}
+                        size={16}
+                        source={tipoRelacionado === 'Perdido' ? SearchIcon : VisibilityIcon}
+                        tint={tipoRelacionado === 'Perdido' ? colors.lostText : colors.sightingText}
+                      />
+                    </Host>
+                    <Text
+                      selectable
+                      style={{
+                        color: tipoRelacionado === 'Perdido' ? colors.lostText : colors.sightingText,
+                        fontSize: 13,
+                        fontWeight: '600',
+                      }}>
+                      {tipoRelacionado}
+                    </Text>
+                  </View>
                   <Text selectable style={{ color: colors.textSecondary, fontSize: 14 }}>
                     {new Date(fechaHoraRelacionada).toLocaleDateString('es-AR')} -{' '}
                     {coincidencia.distancia.toFixed(2)} km
@@ -202,25 +246,15 @@ export function CoincidenciasDetalleScreen({ idReporte }: CoincidenciasDetalleSc
                   </View>
                 </View>
               </View>
+              <Text
+                selectable
+                style={{ alignSelf: 'flex-end', color: colors.action, fontSize: 15, fontWeight: '700', marginTop: 12 }}>
+                Ver reporte
+              </Text>
             </Pressable>
           );
         })}
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          style={{
-            alignItems: 'center',
-            borderColor: '#183B56',
-            borderRadius: 10,
-            borderWidth: 1,
-            marginTop: 12,
-            paddingVertical: 13,
-          }}>
-          <Text style={{ color: '#183B56', fontSize: 16, fontWeight: '600' }}>
-            Volver a mis reportes
-          </Text>
-        </Pressable>
       </View>
     </ScrollView>
   );

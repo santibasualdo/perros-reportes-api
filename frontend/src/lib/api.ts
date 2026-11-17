@@ -36,6 +36,24 @@ export type Coincidencia = {
   fechaHoraReporteAvistamiento: string;
 };
 
+export type Mensaje = {
+  idMensaje: string;
+  idUsuario: string;
+  nombreUsuario: string;
+  contenido: string;
+  fechaHora: string;
+  leido: boolean;
+};
+
+export type Conversacion = {
+  idCoincidencia: string;
+  nombreOtroParticipante: string;
+  ultimoMensaje: string | null;
+  idEmisorUltimoMensaje: string | null;
+  fechaUltimoMensaje: string | null;
+  fechaCreacion: string;
+};
+
 export type ReporteDetalle = {
   idReporte: string;
   tipo: 'PERDIDO' | 'AVISTAMIENTO';
@@ -184,6 +202,131 @@ export async function listarCoincidencias(
   }
 
   return (await respuesta.json()) as Coincidencia[];
+}
+
+export async function listarMensajes(
+  idCoincidencia: string,
+  accessToken: string,
+  signal?: AbortSignal,
+) {
+  if (!apiUrl) {
+    throw new Error('Falta EXPO_PUBLIC_API_URL en el archivo .env.');
+  }
+
+  let respuesta: Response;
+
+  try {
+    respuesta = await fetch(`${apiUrl}/api/coincidencias/${idCoincidencia}/mensajes`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
+
+    throw new Error('No se pudieron cargar los mensajes.');
+  }
+
+  if (!respuesta.ok) {
+    throw new Error(`El backend no pudo cargar los mensajes (${respuesta.status}).`);
+  }
+
+  return (await respuesta.json()) as Mensaje[];
+}
+
+export async function listarConversaciones(accessToken: string, signal?: AbortSignal) {
+  if (!apiUrl) {
+    throw new Error('Falta EXPO_PUBLIC_API_URL en el archivo .env.');
+  }
+
+  let respuesta: Response;
+
+  try {
+    respuesta = await fetch(`${apiUrl}/api/conversaciones`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
+
+    throw new Error('No se pudieron cargar las conversaciones.');
+  }
+
+  if (!respuesta.ok) {
+    throw new Error(`El backend no pudo cargar las conversaciones (${respuesta.status}).`);
+  }
+
+  return (await respuesta.json()) as Conversacion[];
+}
+
+export async function enviarMensaje(
+  idCoincidencia: string,
+  contenido: string,
+  accessToken: string,
+) {
+  if (!apiUrl) {
+    throw new Error('Falta EXPO_PUBLIC_API_URL en el archivo .env.');
+  }
+
+  let respuesta: Response;
+
+  try {
+    respuesta = await fetch(`${apiUrl}/api/coincidencias/${idCoincidencia}/mensajes`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ contenido }),
+    });
+  } catch {
+    throw new Error('No se pudo enviar el mensaje.');
+  }
+
+  if (!respuesta.ok) {
+    throw new Error(`El backend no pudo enviar el mensaje (${respuesta.status}).`);
+  }
+
+  return (await respuesta.json()) as Mensaje;
+}
+
+export async function marcarMensajesLeidos(
+  idCoincidencia: string,
+  accessToken: string,
+  signal?: AbortSignal,
+) {
+  if (!apiUrl) {
+    throw new Error('Falta EXPO_PUBLIC_API_URL en el archivo .env.');
+  }
+
+  let respuesta: Response;
+
+  try {
+    respuesta = await fetch(`${apiUrl}/api/coincidencias/${idCoincidencia}/mensajes/leidos`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
+
+    throw new Error('No se pudieron marcar los mensajes como leidos.');
+  }
+
+  if (!respuesta.ok) {
+    throw new Error(`El backend no pudo marcar los mensajes como leidos (${respuesta.status}).`);
+  }
 }
 
 // Usa el mismo endpoint para confirmar o rechazar una coincidencia.

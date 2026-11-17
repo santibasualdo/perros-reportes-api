@@ -75,6 +75,12 @@ public class FotografiaService {
         return respuestas;
     }
 
+    public String obtenerUrlPrimeraPorReporte(UUID idReporte) {
+        return fotografiaRepository.findFirstByReporte_IdReporteOrderByCreadoEnAsc(idReporte)
+                .map(fotografia -> supabaseStorageService.generarUrlFirmada(fotografia.getUrl()))
+                .orElse(null);
+    }
+
     private String obtenerExtension(String tipoContenido) {
         if ("image/jpeg".equals(tipoContenido)) {
             return ".jpg";

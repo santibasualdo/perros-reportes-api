@@ -14,11 +14,17 @@ public class CoincidenciaResponse {
     private final EstadoCoincidencia estado;
     private final OffsetDateTime creadoEn;
     private final Double similitudVisual;
+    private final String urlFotografiaReportePerdido;
+    private final String urlFotografiaReporteAvistamiento;
+    private final OffsetDateTime fechaHoraReportePerdido;
+    private final OffsetDateTime fechaHoraReporteAvistamiento;
 
     public CoincidenciaResponse(UUID idCoincidencia, UUID idReportePerdido,
             UUID idReporteAvistamiento, Double similitudCaracteristicas,
             Double distancia, Double puntajeTotal, EstadoCoincidencia estado,
-            OffsetDateTime creadoEn, Double similitudVisual) {
+            OffsetDateTime creadoEn, Double similitudVisual,
+            String urlFotografiaReportePerdido, String urlFotografiaReporteAvistamiento,
+            OffsetDateTime fechaHoraReportePerdido, OffsetDateTime fechaHoraReporteAvistamiento) {
         this.idCoincidencia = idCoincidencia;
         this.idReportePerdido = idReportePerdido;
         this.idReporteAvistamiento = idReporteAvistamiento;
@@ -28,6 +34,10 @@ public class CoincidenciaResponse {
         this.estado = estado;
         this.creadoEn = creadoEn;
         this.similitudVisual = similitudVisual;
+        this.urlFotografiaReportePerdido = urlFotografiaReportePerdido;
+        this.urlFotografiaReporteAvistamiento = urlFotografiaReporteAvistamiento;
+        this.fechaHoraReportePerdido = fechaHoraReportePerdido;
+        this.fechaHoraReporteAvistamiento = fechaHoraReporteAvistamiento;
     }
 
     public UUID getIdCoincidencia() {
@@ -64,5 +74,21 @@ public class CoincidenciaResponse {
 
     public Double getSimilitudVisual() {
         return similitudVisual;
+    }
+
+    public String getUrlFotografiaReportePerdido() {
+        return urlFotografiaReportePerdido;
+    }
+
+    public String getUrlFotografiaReporteAvistamiento() {
+        return urlFotografiaReporteAvistamiento;
+    }
+
+    public OffsetDateTime getFechaHoraReportePerdido() {
+        return fechaHoraReportePerdido;
+    }
+
+    public OffsetDateTime getFechaHoraReporteAvistamiento() {
+        return fechaHoraReporteAvistamiento;
     }
 }

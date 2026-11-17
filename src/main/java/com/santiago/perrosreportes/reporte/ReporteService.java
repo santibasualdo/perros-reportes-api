@@ -50,6 +50,16 @@ public class ReporteService {
         return reporteRepository.findAll();
     }
 
+    public List<ReportePropioResponse> listarPorUsuario(UUID idUsuario) {
+        return reporteRepository.findByIdUsuarioOrderByCreadoEnDesc(idUsuario).stream()
+                .map(this::convertirAReportePropioResponse)
+                .toList();
+    }
+
+    public List<ReporteMapaResponse> listarParaMapa() {
+        return ubicacionRepository.listarReportesActivosParaMapa();
+    }
+
     public Reporte buscarPorId(UUID idReporte) {
         return reporteRepository.findById(idReporte)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -93,5 +103,14 @@ public class ReporteService {
                 ubicacionResponse,
                 caracteristicasResponse,
                 fotografias);
+    }
+
+    private ReportePropioResponse convertirAReportePropioResponse(Reporte reporte) {
+        return new ReportePropioResponse(reporte.getIdReporte(),
+                reporte.getTipo(),
+                reporte.getNombre(),
+                reporte.getFechaHora(),
+                reporte.getEstado(),
+                fotografiaService.obtenerUrlPrimeraPorReporte(reporte.getIdReporte()));
     }
 }

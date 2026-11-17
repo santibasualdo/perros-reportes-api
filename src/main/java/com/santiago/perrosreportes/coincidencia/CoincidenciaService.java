@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicas;
 import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicasRepository;
+import com.santiago.perrosreportes.fotografia.FotografiaRepository;
+import com.santiago.perrosreportes.fotografia.SupabaseStorageService;
 import com.santiago.perrosreportes.reporte.Reporte;
 import com.santiago.perrosreportes.reporte.ReporteRepository;
 import com.santiago.perrosreportes.reporte.TipoReporte;
@@ -26,15 +28,21 @@ public class CoincidenciaService {
     private final ReporteRepository reporteRepository;
     private final UbicacionRepository ubicacionRepository;
     private final CaracteristicasFisicasRepository caracteristicasRepository;
+    private final FotografiaRepository fotografiaRepository;
+    private final SupabaseStorageService supabaseStorageService;
 
     public CoincidenciaService(CoincidenciaRepository coincidenciaRepository,
             ReporteRepository reporteRepository,
             UbicacionRepository ubicacionRepository,
-            CaracteristicasFisicasRepository caracteristicasRepository) {
+            CaracteristicasFisicasRepository caracteristicasRepository,
+            FotografiaRepository fotografiaRepository,
+            SupabaseStorageService supabaseStorageService) {
         this.coincidenciaRepository = coincidenciaRepository;
         this.reporteRepository = reporteRepository;
         this.ubicacionRepository = ubicacionRepository;
         this.caracteristicasRepository = caracteristicasRepository;
+        this.fotografiaRepository = fotografiaRepository;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     public List<CoincidenciaResponse> listarPorReporte(UUID idReporte, UUID idUsuario) {
@@ -364,6 +372,16 @@ public class CoincidenciaService {
                 coincidencia.getPuntajeTotal(),
                 coincidencia.getEstado(),
                 coincidencia.getCreadoEn(),
-                coincidencia.getSimilitudVisual());
+                coincidencia.getSimilitudVisual(),
+                obtenerUrlPrimeraFotografia(coincidencia.getReportePerdido().getIdReporte()),
+                obtenerUrlPrimeraFotografia(coincidencia.getReporteAvistamiento().getIdReporte()),
+                coincidencia.getReportePerdido().getFechaHora(),
+                coincidencia.getReporteAvistamiento().getFechaHora());
+    }
+
+    private String obtenerUrlPrimeraFotografia(UUID idReporte) {
+        return fotografiaRepository.findFirstByReporte_IdReporteOrderByCreadoEnAsc(idReporte)
+                .map(fotografia -> supabaseStorageService.generarUrlFirmada(fotografia.getUrl()))
+                .orElse(null);
     }
 }

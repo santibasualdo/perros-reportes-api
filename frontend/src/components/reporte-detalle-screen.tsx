@@ -1,3 +1,5 @@
+import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
+import { Host, Icon } from '@expo/ui/jetpack-compose';
 import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
@@ -38,6 +40,7 @@ export function ReporteDetalleScreen({
   const insets = useSafeAreaInsets();
   const { width: anchoPantalla } = useWindowDimensions();
   const anchoCarrusel = anchoPantalla - 48;
+  const anchoFotoCarrusel = anchoCarrusel - 20;
   const [reporte, setReporte] = useState<ReporteDetalle | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,12 +157,24 @@ export function ReporteDetalleScreen({
       {/* Titulo de la pantalla */}
       <View
         style={{
+          alignItems: 'center',
           borderBottomColor: '#DCE3E6',
           borderBottomWidth: 1,
+          flexDirection: 'row',
+          gap: 12,
           paddingBottom: 24,
           paddingHorizontal: 24,
           paddingTop: 32,
         }}>
+        <Pressable
+          accessibilityLabel="Volver a la pantalla anterior"
+          accessibilityRole="button"
+          onPress={() => router.back()}
+          style={{ alignItems: 'center', height: 36, justifyContent: 'center', width: 28 }}>
+          <Host matchContents>
+            <Icon contentDescription="Volver" size={22} source={ArrowBackIcon} tint="#183B56" />
+          </Host>
+        </Pressable>
         <Text selectable style={{ color: '#183B56', fontSize: 20, fontWeight: '700' }}>
           Detalle del reporte
           {reporte ? ` - ${reporte.tipo === 'PERDIDO' ? 'Perdido' : 'Avistamiento'}` : ''}
@@ -180,13 +195,24 @@ export function ReporteDetalleScreen({
           <View style={{ gap: 18 }}>
             {/* Fotos del reporte */}
             {reporte.fotografias.length > 0 ? (
-              <View style={{ gap: 8 }}>
+              <View
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderColor: '#DCE3E6',
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  gap: 10,
+                  padding: 10,
+                }}>
+                <Text selectable style={{ color: '#183B56', fontSize: 16, fontWeight: '700' }}>
+                  Fotos
+                </Text>
                 <ScrollView
                   decelerationRate="fast"
                   horizontal
                   onMomentumScrollEnd={(evento) => {
                     const nuevaFoto = Math.round(
-                      evento.nativeEvent.contentOffset.x / anchoCarrusel,
+                      evento.nativeEvent.contentOffset.x / anchoFotoCarrusel,
                     );
                     setFotoActual(nuevaFoto);
                   }}
@@ -203,15 +229,30 @@ export function ReporteDetalleScreen({
                         source={fotografia.url}
                         style={{
                           backgroundColor: '#FAFAF7',
-                          borderRadius: 12,
+                          borderRadius: 10,
                           height: 220,
-                          width: anchoCarrusel,
+                          width: anchoFotoCarrusel,
                         }}
                       />
                     </Pressable>
                   ))}
                 </ScrollView>
 
+                {/* Puntos para mostrar que se puede deslizar entre fotos */}
+                <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
+                  {reporte.fotografias.map((fotografia, indice) => (
+                    <View
+                      key={fotografia.idFotografia}
+                      style={{
+                        backgroundColor: indice === fotoActual ? '#183B56' : '#DCE3E6',
+                        borderRadius: 4,
+                        height: 8,
+                        marginHorizontal: 3,
+                        width: 8,
+                      }}
+                    />
+                  ))}
+                </View>
                 <Text
                   style={{
                     color: '#5A6E7C',
@@ -431,21 +472,6 @@ export function ReporteDetalleScreen({
             ) : null}
           </View>
         ) : null}
-
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.back()}
-          style={{
-            alignItems: 'center',
-            borderColor: '#183B56',
-            borderRadius: 10,
-            borderWidth: 1,
-            paddingVertical: 13,
-          }}>
-          <Text style={{ color: '#183B56', fontSize: 16, fontWeight: '600' }}>
-            Volver al mapa
-          </Text>
-        </Pressable>
       </View>
       </ScrollView>
 
