@@ -10,6 +10,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Comparte la sesion actual con todas las pantallas de la app.
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [sesion, setSesion] = useState<Session | null>(null);
   const [cargandoSesion, setCargandoSesion] = useState(true);
@@ -20,11 +21,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Busca si el celular ya tenia una sesion guardada.
     supabase.auth.getSession().then(({ data }) => {
       setSesion(data.session);
       setCargandoSesion(false);
     });
 
+    // Mantiene la sesion actualizada cuando alguien inicia o cierra sesion.
     const { data } = supabase.auth.onAuthStateChange((_evento, siguienteSesion) => {
       setSesion(siguienteSesion);
     });
@@ -39,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Permite que una pantalla lea la sesion sin recibirla por parametros.
 export function useAuth() {
   const auth = useContext(AuthContext);
 

@@ -1,4 +1,5 @@
 import { Link } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -64,28 +65,33 @@ export function LoginScreen() {
         flexGrow: 1,
         backgroundColor: '#ffffff',
         paddingBottom: insets.bottom,
-        paddingTop: insets.top,
       }}>
+      <StatusBar style="light" />
+      {/* Parte de arriba del celular */}
+      <View style={{ backgroundColor: '#183B56', height: insets.top }} />
       <View
         style={{
           backgroundColor: '#ffffff',
           flex: 1,
         }}>
+        {/* Titulo de bienvenida */}
         <View
           style={{
-            borderBottomColor: '#ded9ce',
+            borderBottomColor: '#DCE3E6',
             borderBottomWidth: 1,
             paddingHorizontal: 24,
             paddingBottom: 24,
             paddingTop: 32,
           }}>
-          <Text selectable style={{ color: '#263238', fontSize: 20, fontWeight: '700' }}>
+          <Text selectable style={{ color: '#183B56', fontSize: 20, fontWeight: '700' }}>
             Bienvenido
           </Text>
         </View>
 
+        {/* Formulario de inicio de sesion */}
         <View style={{ flex: 1, justifyContent: 'flex-end', padding: 24 }}>
-          {cargandoSesion ? <ActivityIndicator color="#2f7383" /> : null}
+          {/* Cargando la sesion guardada */}
+          {cargandoSesion ? <ActivityIndicator color="#183B56" /> : null}
 
           {!cargandoSesion && !supabase ? (
             <Text selectable style={{ color: '#b3261e', lineHeight: 24 }}>
@@ -93,6 +99,7 @@ export function LoginScreen() {
             </Text>
           ) : null}
 
+          {/* Se muestra cuando no hay una sesion */}
           {!cargandoSesion && supabase && !sesion ? (
             <View style={{ gap: 12 }}>
               <TextInput
@@ -102,9 +109,9 @@ export function LoginScreen() {
                 keyboardType="email-address"
                 onChangeText={setCorreo}
                 placeholder="Email"
-                placeholderTextColor="#7a7a7a"
+                placeholderTextColor="#5A6E7C"
                 style={{
-                  borderColor: '#ded9ce',
+                  borderColor: '#DCE3E6',
                   borderRadius: 10,
                   borderWidth: 1,
                   fontSize: 16,
@@ -118,10 +125,10 @@ export function LoginScreen() {
                 autoComplete="password"
                 onChangeText={setContrasena}
                 placeholder="Contraseña"
-                placeholderTextColor="#7a7a7a"
+                placeholderTextColor="#5A6E7C"
                 secureTextEntry
                 style={{
-                  borderColor: '#ded9ce',
+                  borderColor: '#DCE3E6',
                   borderRadius: 10,
                   borderWidth: 1,
                   fontSize: 16,
@@ -136,11 +143,11 @@ export function LoginScreen() {
                 onPress={iniciarSesion}
                 style={{
                   alignItems: 'center',
-                  backgroundColor: enviando ? '#8aaeb5' : '#2f7383',
+                  backgroundColor: enviando ? '#DCEAF0' : '#E9826B',
                   borderRadius: 10,
                   padding: 13,
                 }}>
-                <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '600' }}>
+                <Text style={{ color: '#07182A', fontSize: 16, fontWeight: '600' }}>
                   {enviando ? 'Ingresando...' : 'Ingresar'}
                 </Text>
               </Pressable>
@@ -150,12 +157,12 @@ export function LoginScreen() {
                   accessibilityRole="button"
                   style={{
                     alignItems: 'center',
-                    borderColor: '#2f7383',
+                    borderColor: '#183B56',
                     borderRadius: 10,
                     borderWidth: 1,
                     padding: 13,
                   }}>
-                  <Text style={{ color: '#2f7383', fontSize: 16, fontWeight: '600' }}>
+                  <Text style={{ color: '#183B56', fontSize: 16, fontWeight: '600' }}>
                     Crear cuenta
                   </Text>
                 </Pressable>
@@ -163,9 +170,10 @@ export function LoginScreen() {
             </View>
           ) : null}
 
+          {/* Se muestra cuando ya hay una sesion */}
           {!cargandoSesion && sesion ? (
             <View style={{ gap: 12 }}>
-              <Text selectable style={{ color: '#263238', lineHeight: 24 }}>
+              <Text selectable style={{ color: '#183B56', lineHeight: 24 }}>
                 Sesión iniciada: {sesion.user.email}
               </Text>
               <Pressable
@@ -185,6 +193,7 @@ export function LoginScreen() {
             </View>
           ) : null}
 
+          {/* Mensaje de error */}
           {error ? (
             <Text selectable style={{ color: '#b3261e', lineHeight: 22, marginTop: 12 }}>
               {error}

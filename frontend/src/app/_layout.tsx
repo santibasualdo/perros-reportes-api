@@ -1,4 +1,5 @@
 
+import { NavigationBar } from 'expo-navigation-bar';
 import { Stack } from 'expo-router/stack';
 import { useEffect } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
@@ -15,6 +16,7 @@ export default function RootLayout() {
       return;
     }
 
+    // Renueva el token mientras la app esta abierta y lo pausa en segundo plano.
     const actualizarRenovacion = (estado: AppStateStatus) => {
       if (estado === 'active') {
         clienteSupabase.auth.startAutoRefresh();
@@ -38,11 +40,21 @@ export default function RootLayout() {
   }, []);
 
   return (
+    // Estos proveedores dejan disponibles los bordes seguros y la sesion en toda la app.
     <SafeAreaProvider>
+      {/* Controles oscuros sobre la barra de navegacion clara de Android */}
+      <NavigationBar style="light" />
       <AuthProvider>
-        <Stack>
+        {/* Lista de pantallas y navegacion principal */}
+        <Stack screenOptions={{ animation: 'none' }}>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="registro" options={{ headerShown: false }} />
+          <Stack.Screen name="coincidencias" options={{ headerShown: false }} />
+          <Stack.Screen name="coincidencias/[idReporte]" options={{ headerShown: false }} />
+          <Stack.Screen name="conversaciones/[idCoincidencia]" options={{ headerShown: false }} />
+          <Stack.Screen name="perfil" options={{ headerShown: false }} />
+          <Stack.Screen name="reportes/nuevo" options={{ headerShown: false }} />
+          <Stack.Screen name="reportes/[idReporte]" options={{ headerShown: false }} />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

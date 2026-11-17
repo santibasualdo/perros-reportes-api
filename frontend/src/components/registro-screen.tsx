@@ -1,4 +1,5 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ export function RegistroScreen() {
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const validarDatosRegistro = () => {
     const correoNormalizado = correo.trim();
@@ -73,7 +75,7 @@ export function RegistroScreen() {
       }
 
       await crearPerfilUsuario(nombre.trim(), data.session.access_token);
-      setMensaje('La cuenta y el perfil interno se crearon correctamente.');
+      router.replace('/');
     } catch (errorCreacion) {
       setError(
         errorCreacion instanceof Error
@@ -92,22 +94,26 @@ export function RegistroScreen() {
         flexGrow: 1,
         backgroundColor: '#ffffff',
         paddingBottom: insets.bottom,
-        paddingTop: insets.top,
       }}>
+      <StatusBar style="light" />
+      {/* Parte de arriba del celular */}
+      <View style={{ backgroundColor: '#183B56', height: insets.top }} />
       <View style={{ backgroundColor: '#ffffff', flex: 1 }}>
+        {/* Titulo de la pantalla */}
         <View
           style={{
-            borderBottomColor: '#ded9ce',
+            borderBottomColor: '#DCE3E6',
             borderBottomWidth: 1,
             paddingHorizontal: 24,
             paddingBottom: 24,
             paddingTop: 32,
           }}>
-          <Text selectable style={{ color: '#263238', fontSize: 20, fontWeight: '700' }}>
+          <Text selectable style={{ color: '#183B56', fontSize: 20, fontWeight: '700' }}>
             Crear cuenta
           </Text>
         </View>
 
+        {/* Formulario para crear una cuenta */}
         <View style={{ flex: 1, justifyContent: 'flex-end', padding: 24 }}>
           <View style={{ gap: 12 }}>
             <TextInput
@@ -115,9 +121,9 @@ export function RegistroScreen() {
               autoComplete="name"
               onChangeText={setNombre}
               placeholder="Nombre"
-              placeholderTextColor="#7a7a7a"
+              placeholderTextColor="#5A6E7C"
               style={{
-                borderColor: '#ded9ce',
+                borderColor: '#DCE3E6',
                 borderRadius: 10,
                 borderWidth: 1,
                 fontSize: 16,
@@ -133,9 +139,9 @@ export function RegistroScreen() {
               keyboardType="email-address"
               onChangeText={setCorreo}
               placeholder="Email"
-              placeholderTextColor="#7a7a7a"
+              placeholderTextColor="#5A6E7C"
               style={{
-                borderColor: '#ded9ce',
+                borderColor: '#DCE3E6',
                 borderRadius: 10,
                 borderWidth: 1,
                 fontSize: 16,
@@ -149,10 +155,10 @@ export function RegistroScreen() {
               autoComplete="new-password"
               onChangeText={setContrasena}
               placeholder="Contraseña"
-              placeholderTextColor="#7a7a7a"
+              placeholderTextColor="#5A6E7C"
               secureTextEntry
               style={{
-                borderColor: '#ded9ce',
+                borderColor: '#DCE3E6',
                 borderRadius: 10,
                 borderWidth: 1,
                 fontSize: 16,
@@ -166,10 +172,10 @@ export function RegistroScreen() {
               autoComplete="new-password"
               onChangeText={setConfirmacionContrasena}
               placeholder="Confirmar contraseña"
-              placeholderTextColor="#7a7a7a"
+              placeholderTextColor="#5A6E7C"
               secureTextEntry
               style={{
-                borderColor: '#ded9ce',
+                borderColor: '#DCE3E6',
                 borderRadius: 10,
                 borderWidth: 1,
                 fontSize: 16,
@@ -184,11 +190,11 @@ export function RegistroScreen() {
               onPress={crearCuenta}
               style={{
                 alignItems: 'center',
-                backgroundColor: enviando ? '#8aaeb5' : '#2f7383',
+                backgroundColor: enviando ? '#DCEAF0' : '#E9826B',
                 borderRadius: 10,
                 padding: 13,
               }}>
-              <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '600' }}>
+              <Text style={{ color: '#07182A', fontSize: 16, fontWeight: '600' }}>
                 {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
               </Text>
             </Pressable>
@@ -198,7 +204,7 @@ export function RegistroScreen() {
               </Text>
             ) : null}
             {mensaje ? (
-              <Text selectable style={{ color: '#2f7383', lineHeight: 22 }}>
+              <Text selectable style={{ color: '#183B56', lineHeight: 22 }}>
                 {mensaje}
               </Text>
             ) : null}
@@ -207,12 +213,12 @@ export function RegistroScreen() {
                 accessibilityRole="button"
                 style={{
                   alignItems: 'center',
-                  borderColor: '#2f7383',
+                  borderColor: '#183B56',
                   borderRadius: 10,
                   borderWidth: 1,
                   padding: 13,
                 }}>
-                <Text style={{ color: '#2f7383', fontSize: 16, fontWeight: '600' }}>
+                <Text style={{ color: '#183B56', fontSize: 16, fontWeight: '600' }}>
                   Ya tengo cuenta
                 </Text>
               </Pressable>

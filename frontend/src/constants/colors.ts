@@ -1,0 +1,18 @@
+export const colors = {
+  background: '#FAFAF7',
+  surface: '#FFFFFF',
+  primary: '#183B56',
+  action: '#E9826B',
+  onAction: '#07182A',
+  text: '#183B56',
+  textSecondary: '#5A6E7C',
+  tagBackground: '#DCEAF0',
+  tagText: '#183B56',
+  tagStrongBackground: '#183B56',
+  tagStrongText: '#FFFFFF',
+  border: '#DCE3E6',
+  lostBackground: '#FDE2E0',
+  lostText: '#B42318',
+  sightingBackground: '#D7F2ED',
+  sightingText: '#00695C',
+};
