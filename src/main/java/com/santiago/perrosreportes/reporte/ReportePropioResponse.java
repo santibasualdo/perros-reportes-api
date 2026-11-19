@@ -2,6 +2,7 @@ package com.santiago.perrosreportes.reporte;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import com.santiago.perrosreportes.ubicacion.UbicacionResponse;
 
 public class ReportePropioResponse {
 
@@ -11,19 +12,22 @@ public class ReportePropioResponse {
     private final OffsetDateTime fechaHora;
     private final String estado;
     private final String urlFotografia;
+    private final UbicacionResponse ubicacion;
 
     public ReportePropioResponse(UUID idReporte,
             TipoReporte tipo,
             String nombre,
             OffsetDateTime fechaHora,
             String estado,
-            String urlFotografia) {
+            String urlFotografia,
+            UbicacionResponse ubicacion) {
         this.idReporte = idReporte;
         this.tipo = tipo;
         this.nombre = nombre;
         this.fechaHora = fechaHora;
         this.estado = estado;
         this.urlFotografia = urlFotografia;
+        this.ubicacion = ubicacion;
     }
 
     public UUID getIdReporte() {
@@ -48,5 +52,9 @@ public class ReportePropioResponse {
 
     public String getUrlFotografia() {
         return urlFotografia;
+    }
+
+    public UbicacionResponse getUbicacion() {
+        return ubicacion;
     }
 }

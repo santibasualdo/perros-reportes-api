@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/components/auth-provider';
 import { PinReporte } from '@/components/pin-reporte';
 import { colors } from '@/constants/colors';
+import { ESPACIO_BOTON_CREAR } from '@/constants/navegacion';
 import { estiloMapa } from '@/constants/estilo-mapa';
 import { obtenerDireccion } from '@/lib/direccion';
 import { buscarReportePorId, listarReportesMapa, type ReporteDetalle, type ReporteMapa } from '@/lib/api';
@@ -383,7 +384,7 @@ function TarjetaReporteMapa({ reporte, detalle, cargando, abrirDetalle }: {
       accessibilityHint="Abre el detalle del reporte"
       onPress={abrirDetalle}
       style={({ pressed }) => ({
-        position: 'absolute', bottom: 28, left: 12, right: 12,
+        position: 'absolute', bottom: 28 + ESPACIO_BOTON_CREAR, left: 12, right: 12,
         backgroundColor: colors.reportCardBackground, borderRadius: 18, padding: 12,
         flexDirection: 'row', gap: 12, alignItems: 'center',
         boxShadow: colors.reportCardShadow, opacity: pressed ? 0.85 : 1,

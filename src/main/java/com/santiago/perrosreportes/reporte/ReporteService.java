@@ -1,7 +1,10 @@
 package com.santiago.perrosreportes.reporte;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicas;
 import com.santiago.perrosreportes.caracteristicas.CaracteristicasFisicasRepository;
@@ -51,8 +54,14 @@ public class ReporteService {
     }
 
     public List<ReportePropioResponse> listarPorUsuario(UUID idUsuario) {
-        return reporteRepository.findByIdUsuarioOrderByCreadoEnDesc(idUsuario).stream()
-                .map(this::convertirAReportePropioResponse)
+        List<Reporte> reportes = reporteRepository.findByIdUsuarioOrderByCreadoEnDesc(idUsuario);
+        // Buscamos juntas las ubicaciones de estos reportes.
+        List<UUID> ids = reportes.stream().map(Reporte::getIdReporte).toList();
+        Map<UUID, Ubicacion> ubicaciones = ubicacionRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(Ubicacion::getIdReporte, Function.identity()));
+
+        return reportes.stream()
+                .map(reporte -> convertirAReportePropioResponse(reporte, ubicaciones.get(reporte.getIdReporte())))
                 .toList();
     }
 
@@ -105,12 +114,15 @@ public class ReporteService {
                 fotografias);
     }
 
-    private ReportePropioResponse convertirAReportePropioResponse(Reporte reporte) {
+    private ReportePropioResponse convertirAReportePropioResponse(Reporte reporte, Ubicacion ubicacion) {
+        UbicacionResponse ubicacionResponse = ubicacion == null ? null : new UbicacionResponse(
+                ubicacion.getLatitud(), ubicacion.getLongitud(), ubicacion.getDireccion());
         return new ReportePropioResponse(reporte.getIdReporte(),
                 reporte.getTipo(),
                 reporte.getNombre(),
                 reporte.getFechaHora(),
                 reporte.getEstado(),
-                fotografiaService.obtenerUrlPrimeraPorReporte(reporte.getIdReporte()));
+                fotografiaService.obtenerUrlPrimeraPorReporte(reporte.getIdReporte()),
+                ubicacionResponse);
     }
 }

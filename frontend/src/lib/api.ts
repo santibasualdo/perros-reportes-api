@@ -19,6 +19,7 @@ export type ReportePropio = {
   fechaHora: string;
   estado: string;
   urlFotografia: string | null;
+  ubicacion: { latitud: number; longitud: number; direccion: string | null } | null;
 };
 
 export type Coincidencia = {

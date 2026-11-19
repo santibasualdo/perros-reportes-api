@@ -9,6 +9,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/components/auth-provider';
+import { EtiquetaTipoReporte } from '@/components/etiqueta-tipo-reporte';
 import { colors } from '@/constants/colors';
 import { listarCoincidencias, type Coincidencia } from '@/lib/api';
 
@@ -121,7 +122,7 @@ export function CoincidenciasDetalleScreen({ idReporte, nombreReporte, tipoRepor
 
       <View style={{ flex: 1, gap: 14, paddingTop: 12 }}>
         {/* Recordamos qué reporte está consultando la persona. */}
-        <View style={{ alignItems: 'center', backgroundColor: colors.reportSummaryBackground, borderRadius: 18, flexDirection: 'row', gap: 12, padding: 12 }}>
+        <View style={{ alignItems: 'center', backgroundColor: colors.matchSummaryBackground, borderColor: colors.reportCardBorder, borderRadius: 18, borderWidth: 1, flexDirection: 'row', gap: 12, padding: 12 }}>
           {fotoReporte ? (
             <Image source={fotoReporte} contentFit="contain" style={{ borderRadius: 12, height: 52, width: 52 }} />
           ) : (
@@ -131,9 +132,14 @@ export function CoincidenciasDetalleScreen({ idReporte, nombreReporte, tipoRepor
           )}
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: '600' }}>BUSCANDO COINCIDENCIAS PARA</Text>
-            <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 4 }}>
-              {nombreReporte?.trim() || 'Tu reporte'}{tipoReporte === 'PERDIDO' ? ' · Perdido' : tipoReporte === 'AVISTAMIENTO' ? ' · Avistamiento' : ''}
-            </Text>
+            <View style={{ alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+              <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>
+                {nombreReporte?.trim() || 'Tu reporte'}
+              </Text>
+              {tipoReporte === 'PERDIDO' || tipoReporte === 'AVISTAMIENTO' ? (
+                <EtiquetaTipoReporte tipo={tipoReporte} />
+              ) : null}
+            </View>
           </View>
         </View>
         {!cargando && !error && coincidencias.length > 0 ? (
@@ -232,7 +238,7 @@ function ResultadoCoincidencia({
       )}
       <View style={{ flex: 1, gap: 6, justifyContent: 'center' }}>
         <View style={{ alignItems: 'flex-start', flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-          <Text style={{ backgroundColor: fondoTipo, borderRadius: 12, color: textoTipo, fontSize: 11, fontWeight: '700', overflow: 'hidden', paddingHorizontal: 8, paddingVertical: 4 }}>{tipo}</Text>
+          <EtiquetaTipoReporte tipo={esPerdido ? 'PERDIDO' : 'AVISTAMIENTO'} />
           <Text style={{ backgroundColor: estiloPuntaje.fondo, borderRadius: 12, color: estiloPuntaje.texto, fontSize: 11, fontWeight: '700', overflow: 'hidden', paddingHorizontal: 8, paddingVertical: 4 }}>{Math.round(coincidencia.puntajeTotal)}% compatible</Text>
         </View>
         <Text numberOfLines={2} style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>

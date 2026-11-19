@@ -2,12 +2,15 @@
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { PawPrintIcon } from 'phosphor-react-native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 import { useAuth } from '@/components/auth-provider';
 import { colors } from '@/constants/colors';
+import { ESPACIO_BOTON_CREAR } from '@/constants/navegacion';
 import { listarConversaciones, type Conversacion } from '@/lib/api';
 
 export function ConversacionesScreen() {
@@ -57,25 +60,31 @@ export function ConversacionesScreen() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
-        backgroundColor: colors.reportListBackground,
+        backgroundColor: colors.messagesBackground,
         flexGrow: 1,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + ESPACIO_BOTON_CREAR,
       }}>
       <StatusBar style="dark" />
       {/* Parte de arriba del celular */}
-      <View style={{ backgroundColor: colors.reportListBackground, height: insets.top }} />
+      <View style={{ backgroundColor: colors.messagesBackground, height: insets.top }} />
 
-      {/* Titulo de la pantalla */}
+      {/* La onda y la huella son solo un detalle del encabezado. */}
       <View
         style={{
-          backgroundColor: colors.reportListBackground,
+          backgroundColor: colors.messagesBackground,
+          overflow: 'hidden',
           paddingBottom: 20,
           paddingHorizontal: 24,
           paddingTop: 12,
         }}>
-        <View style={{ alignItems: 'center', flexDirection: 'row', gap: 6, justifyContent: 'center', marginBottom: 24 }}>
-          <Image source={require('../../assets/images/logo-huellas-transparente.png')} contentFit="contain" style={{ height: 36, width: 36 }} />
-          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700' }}>Huellas a Casa</Text>
+        <Svg pointerEvents="none" accessible={false} viewBox="0 0 260 100" preserveAspectRatio="none" style={{ position: 'absolute', right: 0, top: 0, width: '68%', height: 100 }}>
+          <Path fill={colors.messagesWave} d="M0 80 C65 80 95 51 145 27 C180 10 220 7 260 8 L260 100 C220 92 198 72 154 69 C100 65 71 87 0 80Z" />
+        </Svg>
+        <View pointerEvents="none" accessible={false} style={{ position: 'absolute', right: 24, top: 24 }}>
+          <PawPrintIcon size={40} color={colors.messagesPaw} weight="fill" />
+        </View>
+        <View style={{ alignItems: 'flex-start', height: 50, justifyContent: 'center', marginBottom: 24 }}>
+          <Image source={require('../../assets/images/logo-huellas-transparente.png')} contentFit="contain" accessibilityLabel="Huellas a Casa" style={{ height: 48, width: 48 }} />
         </View>
         <Text selectable style={{ color: colors.text, fontSize: 24, fontWeight: '700' }}>
           Mensajes
@@ -93,7 +102,7 @@ export function ConversacionesScreen() {
           </Text>
         ) : null}
 
-        {conversaciones.map((conversacion) => {
+        {conversaciones.map((conversacion, indice) => {
           const nombreParticipante = conversacion.nombreOtroParticipante ?? 'Participante';
           const ultimoMensajeEsPropio = conversacion.idEmisorUltimoMensaje === sesion?.user.id;
           const textoUltimoMensaje = conversacion.ultimoMensaje
@@ -116,6 +125,9 @@ export function ConversacionesScreen() {
             }
             style={({ pressed }) => ({
               alignItems: 'center',
+              // Separamos los chats sin agregar una linea despues del ultimo.
+              borderBottomColor: colors.messagesSeparator,
+              borderBottomWidth: indice < conversaciones.length - 1 ? 1 : 0,
               flexDirection: 'row',
               gap: 12,
               opacity: pressed ? 0.7 : 1,

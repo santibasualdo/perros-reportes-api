@@ -1,16 +1,21 @@
 import ChevronIcon from '@expo/material-symbols/chevron_right.xml';
+import LocationIcon from '@expo/material-symbols/location_on.xml';
 import ScheduleIcon from '@expo/material-symbols/schedule.xml';
 import { Host, Icon } from '@expo/ui/jetpack-compose';
 import { StatusBar } from 'expo-status-bar';
 import { Image } from 'expo-image';
+import * as Location from 'expo-location';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/components/auth-provider';
+import { EtiquetaTipoReporte } from '@/components/etiqueta-tipo-reporte';
 import { colors } from '@/constants/colors';
+import { ESPACIO_BOTON_CREAR } from '@/constants/navegacion';
 import { listarMisReportes, type ReportePropio } from '@/lib/api';
+import { obtenerDireccion } from '@/lib/direccion';
 
 export function CoincidenciasScreen() {
   const { sesion } = useAuth();
@@ -37,6 +42,40 @@ export function CoincidenciasScreen() {
 
         setReportes(reportesRecibidos);
         setError(null);
+        setCargando(false);
+
+        // Si falta la direccion, intentamos obtenerla sin hacer esperar la lista.
+        const pendientes = reportesRecibidos.filter((reporte) =>
+          reporte.ubicacion && !reporte.ubicacion.direccion?.trim(),
+        );
+        if (pendientes.length === 0) return;
+
+        // Pedimos el permiso una sola vez, aunque haya varios reportes.
+        try {
+          let permiso = await Location.getForegroundPermissionsAsync();
+          if (!permiso.granted) permiso = await Location.requestForegroundPermissionsAsync();
+          if (!permiso.granted || controller.signal.aborted) return;
+        } catch {
+          return;
+        }
+
+        pendientes.forEach((reporte) => {
+          const ubicacion = reporte.ubicacion;
+          if (!ubicacion || ubicacion.direccion?.trim()) return;
+
+          obtenerDireccion(ubicacion.latitud, ubicacion.longitud)
+            .then((direccion) => {
+              if (!direccion || controller.signal.aborted) return;
+              setReportes((actuales) => actuales.map((actual) =>
+                actual.idReporte === reporte.idReporte && actual.ubicacion
+                  ? { ...actual, ubicacion: { ...actual.ubicacion, direccion } }
+                  : actual,
+              ));
+            })
+            .catch(() => {
+              // La tarjeta sigue disponible aunque no se pueda obtener la calle.
+            });
+        });
       } catch (errorCarga) {
         if (errorCarga instanceof Error && errorCarga.name !== 'AbortError') {
           setError(errorCarga.message);
@@ -54,13 +93,13 @@ export function CoincidenciasScreen() {
   }, [sesion]));
 
   return (
-    <View style={{ backgroundColor: '#F5F3ED', flex: 1 }}>
+    <View style={{ backgroundColor: colors.reportListBackground, flex: 1 }}>
       <StatusBar style="dark" />
       {/* Parte de arriba del celular */}
       <View style={{ height: insets.top }} />
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 + ESPACIO_BOTON_CREAR }}
         showsVerticalScrollIndicator={false}>
         {/* Titulo y explicacion breve */}
         <View
@@ -111,7 +150,7 @@ export function CoincidenciasScreen() {
               <View
                 style={{
                   alignItems: 'center',
-                  backgroundColor: '#FFFAF3',
+                  backgroundColor: colors.reportListBackground,
                   borderColor: '#E9E2D6',
                   borderRadius: 18,
                   borderWidth: 1,
@@ -125,7 +164,7 @@ export function CoincidenciasScreen() {
                     contentFit="contain"
                     source={{ uri: reporte.urlFotografia }}
                     style={{
-                      backgroundColor: '#FFFAF3',
+                      backgroundColor: colors.reportListBackground,
                       borderRadius: 12,
                       height: 98,
                       width: 88,
@@ -144,13 +183,24 @@ export function CoincidenciasScreen() {
 
                 <View style={{ flex: 1, justifyContent: 'center' }}>
                   {/* Primero mostramos el tipo y despues el nombre del perro. */}
-                  <EtiquetaTipo tipo={reporte.tipo} />
+                  <EtiquetaTipoReporte tipo={reporte.tipo} />
                   <Text
                     numberOfLines={2}
                     selectable
                     style={{ color: colors.text, fontFamily: 'serif', fontSize: 22, fontWeight: '700', marginTop: 6 }}>
                     {reporte.nombre ?? 'Sin nombre'}
                   </Text>
+
+                  {reporte.ubicacion?.direccion?.trim() ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
+                      <Host matchContents>
+                        <Icon source={LocationIcon} size={14} tint={colors.textSecondary} />
+                      </Host>
+                      <Text numberOfLines={1} selectable style={{ flex: 1, color: colors.textSecondary, fontSize: 13 }}>
+                        {reporte.ubicacion.direccion}
+                      </Text>
+                    </View>
+                  ) : null}
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
                     <Host matchContents>
@@ -178,30 +228,6 @@ export function CoincidenciasScreen() {
       </ScrollView>
 
       {/* Barra de navegacion con coincidencias seleccionada */}
-    </View>
-  );
-}
-
-function EtiquetaTipo({ tipo }: { tipo: ReportePropio['tipo'] }) {
-  const perdido = tipo === 'PERDIDO';
-  const colorFondo = perdido ? colors.lostBackground : colors.sightingBackground;
-  const colorTexto = perdido ? colors.lostText : colors.sightingText;
-
-  return (
-    <View
-      style={{
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-        backgroundColor: colorFondo,
-        borderRadius: 999,
-        flexDirection: 'row',
-        gap: 4,
-        paddingHorizontal: 9,
-        paddingVertical: 4,
-      }}>
-      <Text selectable style={{ color: colorTexto, fontSize: 12, fontWeight: '700' }}>
-        {perdido ? 'Perdido' : 'Avistamiento'}
-      </Text>
     </View>
   );
 }

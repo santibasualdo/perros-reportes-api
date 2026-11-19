@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/components/auth-provider';
 import { colors } from '@/constants/colors';
+import { ESPACIO_BOTON_CREAR } from '@/constants/navegacion';
 import { supabase } from '@/lib/supabase';
 
 export function PerfilScreen() {
@@ -41,7 +42,7 @@ export function PerfilScreen() {
       contentContainerStyle={{
         backgroundColor: colors.background,
         flexGrow: 1,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + ESPACIO_BOTON_CREAR,
       }}>
       <StatusBar style="light" />
       {/* Parte de arriba del celular */}

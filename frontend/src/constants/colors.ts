@@ -1,5 +1,8 @@
+// Fondo claro compartido por las pantallas de la app.
+const fondoPantalla = '#FDFBF6';
+
 export const colors = {
-  background: '#FAFAF7',
+  background: fondoPantalla,
   surface: '#FFFFFF',
   primary: '#183B56',
   action: '#4F2A52',
@@ -26,11 +29,16 @@ export const colors = {
   coincidencesAction: '#4F2A52',
   onCoincidencesAction: '#FFFFFF',
   reportCardShadow: '0 4px 14px rgba(7, 24, 42, 0.08)',
-  reportListBackground: '#F5F3ED',
+  reportListBackground: fondoPantalla,
+  messagesBackground: fondoPantalla,
+  messagesWave: '#E6E8DA',
+  messagesPaw: '#AAB49B',
+  messagesSeparator: '#E9E6DC',
   reportCardBackground: '#FFFAF3',
   reportCardBorder: '#E9E2D6',
   reportSummaryBackground: '#EBECE2',
-  reportDetailBackground: '#F6F2EC',
+  matchSummaryBackground: fondoPantalla,
+  reportDetailBackground: fondoPantalla,
   reportDetailSection: '#EEE9DF',
   reportDetailSectionHeader: '#D7DBC6',
   reportDetailBrand: '#858A6B',
