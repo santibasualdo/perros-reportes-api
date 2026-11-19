@@ -376,7 +376,9 @@ public class CoincidenciaService {
                 obtenerUrlPrimeraFotografia(coincidencia.getReportePerdido().getIdReporte()),
                 obtenerUrlPrimeraFotografia(coincidencia.getReporteAvistamiento().getIdReporte()),
                 coincidencia.getReportePerdido().getFechaHora(),
-                coincidencia.getReporteAvistamiento().getFechaHora());
+                coincidencia.getReporteAvistamiento().getFechaHora(),
+                coincidencia.getReportePerdido().getNombre(),
+                coincidencia.getReporteAvistamiento().getNombre());
     }
 
     private String obtenerUrlPrimeraFotografia(UUID idReporte) {

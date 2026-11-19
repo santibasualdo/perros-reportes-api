@@ -47,15 +47,21 @@ export default function RootLayout() {
       <AuthProvider>
         {/* Lista de pantallas y navegacion principal */}
         <Stack screenOptions={{ animation: 'none' }}>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="registro" options={{ headerShown: false }} />
-          <Stack.Screen name="coincidencias" options={{ headerShown: false }} />
-          <Stack.Screen name="coincidencias/[idReporte]" options={{ headerShown: false }} />
-          <Stack.Screen name="conversaciones" options={{ headerShown: false }} />
-          <Stack.Screen name="conversaciones/[idCoincidencia]" options={{ headerShown: false }} />
-          <Stack.Screen name="perfil" options={{ headerShown: false }} />
+          <Stack.Screen name="(principal)" options={{ headerShown: false }} />
+          <Stack.Screen name="registro" options={{ animation: 'fade', headerShown: false }} />
+          <Stack.Screen
+            name="coincidencias/[idReporte]"
+            options={{ animation: 'fade', animationMatchesGesture: true, headerShown: false }}
+          />
+          <Stack.Screen
+            name="conversaciones/[idCoincidencia]"
+            options={{ animation: 'fade', animationMatchesGesture: true, headerShown: false }}
+          />
           <Stack.Screen name="reportes/nuevo" options={{ headerShown: false }} />
-          <Stack.Screen name="reportes/[idReporte]" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="reportes/[idReporte]"
+            options={{ animation: 'fade', animationMatchesGesture: true, headerShown: false }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

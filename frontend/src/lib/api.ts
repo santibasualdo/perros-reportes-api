@@ -1,4 +1,5 @@
 import { fetch } from 'expo/fetch';
+import { Platform } from 'react-native';
 
 // Direccion base del backend configurada para esta instalacion de la app.
 const apiUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '');
@@ -34,6 +35,8 @@ export type Coincidencia = {
   urlFotografiaReporteAvistamiento: string | null;
   fechaHoraReportePerdido: string;
   fechaHoraReporteAvistamiento: string;
+  nombreReportePerdido: string | null;
+  nombreReporteAvistamiento: string | null;
 };
 
 export type Mensaje = {
@@ -472,22 +475,38 @@ export async function subirFotografiaReporte(
   }
 
   try {
-    const archivoLocal = await fetch(foto.uri);
-    const archivoSinTipo = await archivoLocal.blob();
-    const archivo = archivoSinTipo.slice(0, archivoSinTipo.size, foto.tipo);
     const formulario = new FormData();
-    formulario.append('archivo', archivo, foto.nombre);
+    if (Platform.OS === 'web') {
+      const archivoLocal = await fetch(foto.uri);
+      const archivoSinTipo = await archivoLocal.blob();
+      const archivo = archivoSinTipo.slice(0, archivoSinTipo.size, foto.tipo);
+      formulario.append('archivo', archivo, foto.nombre);
+    } else {
+      // Expo acepta archivos locales por URI; los tipos de FormData solo describen Blob.
+      formulario.append('archivo', { uri: foto.uri, name: foto.nombre, type: foto.tipo } as unknown as Blob);
+    }
 
-    const respuesta = await fetch(`${apiUrl}/api/reportes/${idReporte}/fotografias`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: formulario,
-    });
-
-    if (!respuesta.ok) {
-      throw new Error(`El backend rechazó la fotografía (${respuesta.status}).`);
+    const url = `${apiUrl}/api/reportes/${idReporte}/fotografias`;
+    if (Platform.OS === 'web') {
+      const respuesta = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formulario,
+      });
+      if (!respuesta.ok) throw new Error(`El backend rechazó la fotografía (${respuesta.status}).`);
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        const solicitud = new XMLHttpRequest();
+        solicitud.open('POST', url);
+        solicitud.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+        solicitud.onload = () => {
+          if (solicitud.status >= 200 && solicitud.status < 300) resolve();
+          else reject(new Error(`El backend rechazó la fotografía (${solicitud.status}).`));
+        };
+        solicitud.onerror = () => reject(new Error('No se pudo subir la fotografía.'));
+        solicitud.ontimeout = () => reject(new Error('No se pudo subir la fotografía.'));
+        solicitud.send(formulario);
+      });
     }
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('El backend')) {

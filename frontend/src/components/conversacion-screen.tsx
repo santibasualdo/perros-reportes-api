@@ -1,10 +1,9 @@
-import ArrowBackIcon from '@expo/material-symbols/arrow_back.xml';
-import SendIcon from '@expo/material-symbols/send.xml';
-import { Host, Icon } from '@expo/ui/jetpack-compose';
+// Iconos del encabezado y del boton para enviar.
+import { ArrowLeftIcon, PaperPlaneRightIcon } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Fragment, type ComponentRef, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/components/auth-provider';
@@ -28,19 +27,33 @@ export function ConversacionScreen({
   const { sesion } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  // Bajamos al final cuando llegan los mensajes iniciales o enviamos uno nuevo.
+  const listaRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  const bajarAlFinal = useRef(false);
+  // Datos del chat y estado del mensaje que se esta escribiendo.
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [cargando, setCargando] = useState(true);
   const [contenido, setContenido] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tecladoVisible, setTecladoVisible] = useState(false);
   const nombreParticipante =
     nombreOtroParticipante ??
     mensajes.find((mensaje) => mensaje.idUsuario !== sesion?.user.id)?.nombreUsuario ??
     'Conversacion';
 
   useEffect(() => {
+    // Al abrir el teclado dejamos visible el mensaje mas reciente.
+    const mostrar = Keyboard.addListener('keyboardDidShow', () => {
+      setTecladoVisible(true);
+      requestAnimationFrame(() => listaRef.current?.scrollToEnd({ animated: false }));
+    });
+    const ocultar = Keyboard.addListener('keyboardDidHide', () => setTecladoVisible(false));
+    return () => { mostrar.remove(); ocultar.remove(); };
+  }, []);
+
+  useEffect(() => {
     if (!sesion) {
-      setCargando(false);
       return;
     }
 
@@ -55,6 +68,7 @@ export function ConversacionScreen({
           controller.signal,
         );
 
+        bajarAlFinal.current = true;
         setMensajes(mensajesRecibidos);
         setError(null);
 
@@ -102,6 +116,7 @@ export function ConversacionScreen({
         sesion.access_token,
       );
 
+      bajarAlFinal.current = true;
       setMensajes((mensajesActuales) => [...mensajesActuales, mensajeNuevo]);
       setContenido('');
       setError(null);
@@ -113,106 +128,121 @@ export function ConversacionScreen({
   };
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{
-        backgroundColor: colors.background,
-        flexGrow: 1,
-        paddingBottom: insets.bottom,
-      }}>
-      <StatusBar style="light" />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ backgroundColor: colors.reportListBackground, flex: 1 }}>
+      <StatusBar style="dark" />
       {/* Parte de arriba del celular */}
-      <View style={{ backgroundColor: colors.primary, height: insets.top }} />
+      <View style={{ backgroundColor: colors.reportListBackground, height: insets.top }} />
 
       {/* Cabecera de la conversacion */}
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: colors.surface,
-          borderBottomColor: colors.border,
+          backgroundColor: colors.reportListBackground,
+          borderBottomColor: colors.reportCardBorder,
           borderBottomWidth: 1,
           flexDirection: 'row',
           gap: 12,
-          paddingBottom: 20,
-          paddingHorizontal: 24,
-          paddingTop: 24,
+          paddingBottom: 12,
+          paddingHorizontal: 16,
+          paddingTop: 12,
         }}>
         <Pressable
-          accessibilityLabel="Volver a la coincidencia"
+          accessibilityLabel="Volver a la pantalla anterior"
           accessibilityRole="button"
           onPress={() => router.back()}
-          style={{ alignItems: 'center', height: 36, justifyContent: 'center', width: 28 }}>
-          <Host matchContents>
-            <Icon contentDescription="Volver" size={22} source={ArrowBackIcon} tint={colors.primary} />
-          </Host>
+          style={{ alignItems: 'center', backgroundColor: colors.reportSummaryBackground, borderRadius: 24, height: 48, justifyContent: 'center', width: 48 }}>
+          <ArrowLeftIcon size={22} color={colors.primary} />
         </Pressable>
         <View
           style={{
             alignItems: 'center',
-            backgroundColor: colors.tagBackground,
-            borderRadius: 20,
-            height: 40,
+            backgroundColor: colors.action,
+            borderRadius: 24,
+            height: 48,
             justifyContent: 'center',
-            width: 40,
+            width: 48,
           }}>
-          <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '700' }}>
-            {nombreParticipante.charAt(0).toUpperCase()}
+          <Text style={{ color: colors.onAction, fontSize: 16, fontWeight: '700' }}>
+            {obtenerIniciales(nombreParticipante)}
           </Text>
         </View>
-        <View>
-          <Text selectable style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
+        <View style={{ flex: 1 }}>
+          <Text numberOfLines={1} selectable style={{ color: colors.text, fontSize: 17, fontWeight: '700' }}>
             {nombreParticipante}
-          </Text>
-          <Text selectable style={{ color: colors.textSecondary, fontSize: 12 }}>
-            Coincidencia confirmada
           </Text>
         </View>
       </View>
 
-      {/* Mensajes de la conversacion */}
-      <View style={{ flex: 1, gap: 12, padding: 20 }}>
-        {cargando ? <ActivityIndicator color={colors.primary} /> : null}
+      {/* Solo los mensajes se desplazan; la cabecera y el campo quedan fijos. */}
+      <ScrollView
+        ref={listaRef}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={() => {
+          if (bajarAlFinal.current) {
+            bajarAlFinal.current = false;
+            // Esperamos a que la lista termine de acomodar los mensajes.
+            requestAnimationFrame(() => listaRef.current?.scrollToEnd({ animated: false }));
+          }
+        }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: tecladoVisible ? 1 : undefined, gap: 12, justifyContent: tecladoVisible ? 'flex-end' : undefined, padding: 20 }}>
+        {cargando && sesion ? <ActivityIndicator color={colors.primary} /> : null}
 
-        {error ? <Text selectable style={{ color: colors.lostText }}>{error}</Text> : null}
+        {error ? <Text selectable style={{ color: colors.error }}>{error}</Text> : null}
 
-        {mensajes.map((mensaje) => {
+        {mensajes.map((mensaje, indice) => {
           const esPropio = mensaje.idUsuario === sesion?.user.id;
+          const diaActual = obtenerDia(mensaje.fechaHora);
+          const diaAnterior = indice > 0 ? obtenerDia(mensajes[indice - 1].fechaHora) : null;
 
           return (
+            <Fragment key={mensaje.idMensaje}>
+            {diaActual !== diaAnterior ? (
+              <View style={{ alignItems: 'center', flexDirection: 'row', gap: 10, marginVertical: 6 }}>
+                <View style={{ backgroundColor: colors.reportCardBorder, flex: 1, height: 1 }} />
+                <Text style={{ backgroundColor: colors.reportSummaryBackground, borderRadius: 14, color: colors.text, fontSize: 12, overflow: 'hidden', paddingHorizontal: 12, paddingVertical: 6 }}>
+                  {formatearDia(mensaje.fechaHora)}
+                </Text>
+                <View style={{ backgroundColor: colors.reportCardBorder, flex: 1, height: 1 }} />
+              </View>
+            ) : null}
             <View
-              key={mensaje.idMensaje}
               style={{
                 alignSelf: esPropio ? 'flex-end' : 'flex-start',
-                backgroundColor: esPropio ? colors.primary : colors.tagBackground,
-                borderColor: esPropio ? colors.primary : colors.border,
+                backgroundColor: esPropio ? colors.reportDetailSectionHeader : colors.reportCardBackground,
+                borderColor: colors.reportCardBorder,
                 borderRadius: 18,
                 borderWidth: esPropio ? 0 : 1,
                 maxWidth: '80%',
                 paddingHorizontal: 14,
                 paddingVertical: 10,
               }}>
-              <Text selectable style={{ color: esPropio ? colors.surface : colors.text, fontSize: 16 }}>
+              <Text selectable style={{ color: colors.text, fontSize: 16 }}>
                 {mensaje.contenido}
               </Text>
               <Text
                 selectable
                 style={{
-                  color: esPropio ? colors.surface : colors.textSecondary,
+                  alignSelf: 'flex-end',
+                  color: colors.textSecondary,
                   fontSize: 12,
                   marginTop: 4,
                 }}>
-                {`${mensaje.leido ? 'Leido' : 'Enviado'} - ${formatearHora(mensaje.fechaHora)}`}
+                {`${formatearHora(mensaje.fechaHora)}${esPropio ? mensaje.leido ? ' · Leído' : ' · Enviado' : ''}`}
               </Text>
             </View>
+            </Fragment>
           );
         })}
-      </View>
+      </ScrollView>
 
       {/* Barra para escribir al final del chat */}
       <View
         style={{
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
+          backgroundColor: colors.reportListBackground,
+          borderTopColor: colors.reportCardBorder,
           borderTopWidth: 1,
           flexDirection: 'row',
           gap: 10,
@@ -226,17 +256,19 @@ export function ConversacionScreen({
           maxLength={200}
           multiline
           onChangeText={setContenido}
-          placeholder="Escribi un mensaje..."
+          placeholder="Escribí un mensaje"
           placeholderTextColor={colors.textSecondary}
           style={{
-            borderColor: colors.border,
+            backgroundColor: colors.reportCardBackground,
+            borderColor: colors.reportCardBorder,
             borderRadius: 24,
             borderWidth: 1,
             color: colors.text,
             flex: 1,
             maxHeight: 100,
             minHeight: 48,
-            paddingHorizontal: 12,
+            paddingLeft: 20,
+            paddingRight: 12,
           }}
           value={contenido}
         />
@@ -255,19 +287,43 @@ export function ConversacionScreen({
             opacity: enviando ? 0.6 : 1,
             width: 52,
           }}>
-          <Host matchContents>
-            <Icon
-              contentDescription={enviando ? 'Enviando mensaje' : 'Enviar mensaje'}
-              size={23}
-              source={SendIcon}
-              tint={colors.onAction}
-            />
-          </Host>
+          <PaperPlaneRightIcon size={23} color={colors.onAction} weight="fill" />
         </Pressable>
       </View>
 
-    </ScrollView>
+    </KeyboardAvoidingView>
   );
+}
+
+// Si no hay foto de perfil, identificamos a la persona con sus iniciales.
+function obtenerIniciales(nombre: string) {
+  return nombre.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((palabra) => palabra.charAt(0).toUpperCase()).join('') || 'C';
+}
+
+function obtenerDia(fechaHora: string) {
+  const fecha = new Date(fechaHora);
+  if (Number.isNaN(fecha.getTime())) {
+    return 'invalida';
+  }
+  return `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
+}
+
+function formatearDia(fechaHora: string) {
+  const fecha = new Date(fechaHora);
+  if (Number.isNaN(fecha.getTime())) {
+    return 'Fecha no disponible';
+  }
+
+  const hoy = new Date();
+  const ayer = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+  if (obtenerDia(fechaHora) === obtenerDia(hoy.toISOString())) return 'Hoy';
+  if (obtenerDia(fechaHora) === obtenerDia(ayer.toISOString())) return 'Ayer';
+
+  return new Intl.DateTimeFormat('es-AR', {
+    day: 'numeric',
+    month: 'long',
+    ...(fecha.getFullYear() !== hoy.getFullYear() ? { year: 'numeric' } : {}),
+  }).format(fecha);
 }
 
 function formatearHora(fechaHora: string) {

@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BarraNavegacion } from '@/components/barra-navegacion';
 import { useAuth } from '@/components/auth-provider';
+import { colors } from '@/constants/colors';
 import { supabase } from '@/lib/supabase';
 
 export function PerfilScreen() {
@@ -39,14 +39,14 @@ export function PerfilScreen() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.background,
         flexGrow: 1,
         paddingBottom: insets.bottom,
       }}>
       <StatusBar style="light" />
       {/* Parte de arriba del celular */}
       <View style={{ backgroundColor: '#183B56', height: insets.top }} />
-      <View style={{ backgroundColor: '#ffffff', flex: 1 }}>
+      <View style={{ backgroundColor: colors.background, flex: 1 }}>
         {/* Titulo de la pantalla */}
         <View
           style={{
@@ -90,8 +90,6 @@ export function PerfilScreen() {
           </Pressable>
         </View>
 
-        {/* Barra de navegacion con perfil seleccionado */}
-        <BarraNavegacion seccionActiva="perfil" />
       </View>
     </ScrollView>
   );

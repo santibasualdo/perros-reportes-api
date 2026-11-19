@@ -33,6 +33,7 @@ build/
 .vscode/
 
 # Configuración local y variables sensibles
+/CONTEXTO_PROYECTO.md
 .env
 .env.*
 !.env.example

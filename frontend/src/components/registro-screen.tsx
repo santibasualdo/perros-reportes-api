@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { crearPerfilUsuario } from '@/lib/api';
+import { colors } from '@/constants/colors';
 import { supabase, supabaseConfigurationError } from '@/lib/supabase';
 
 export function RegistroScreen() {
@@ -92,13 +93,13 @@ export function RegistroScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         flexGrow: 1,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.background,
         paddingBottom: insets.bottom,
       }}>
       <StatusBar style="light" />
       {/* Parte de arriba del celular */}
       <View style={{ backgroundColor: '#183B56', height: insets.top }} />
-      <View style={{ backgroundColor: '#ffffff', flex: 1 }}>
+      <View style={{ backgroundColor: colors.background, flex: 1 }}>
         {/* Titulo de la pantalla */}
         <View
           style={{
@@ -190,11 +191,11 @@ export function RegistroScreen() {
               onPress={crearCuenta}
               style={{
                 alignItems: 'center',
-                backgroundColor: enviando ? '#DCEAF0' : '#E9826B',
+                backgroundColor: enviando ? '#DCEAF0' : colors.action,
                 borderRadius: 10,
                 padding: 13,
               }}>
-              <Text style={{ color: '#07182A', fontSize: 16, fontWeight: '600' }}>
+              <Text style={{ color: enviando ? colors.textSecondary : colors.onAction, fontSize: 16, fontWeight: '600' }}>
                 {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
               </Text>
             </Pressable>

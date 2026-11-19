@@ -1,10 +1,12 @@
 import { Link } from 'expo-router';
+import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/components/auth-provider';
+import { colors } from '@/constants/colors';
 import { supabase, supabaseConfigurationError } from '@/lib/supabase';
 
 export function LoginScreen() {
@@ -12,8 +14,18 @@ export function LoginScreen() {
   const [contrasena, setContrasena] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tecladoVisible, setTecladoVisible] = useState(false);
   const { cargandoSesion, sesion } = useAuth();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    const mostrar = Keyboard.addListener('keyboardDidShow', () => setTecladoVisible(true));
+    const ocultar = Keyboard.addListener('keyboardDidHide', () => setTecladoVisible(false));
+    return () => {
+      mostrar.remove();
+      ocultar.remove();
+    };
+  }, []);
 
   const iniciarSesion = async () => {
     if (!supabase) {
@@ -59,37 +71,48 @@ export function LoginScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}>
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         flexGrow: 1,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.background,
         paddingBottom: insets.bottom,
       }}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       {/* Parte de arriba del celular */}
-      <View style={{ backgroundColor: '#183B56', height: insets.top }} />
+      <View style={{ backgroundColor: colors.background, height: insets.top }} />
       <View
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.background,
           flex: 1,
         }}>
         {/* Titulo de bienvenida */}
         <View
           style={{
-            borderBottomColor: '#DCE3E6',
-            borderBottomWidth: 1,
+            alignItems: 'center',
             paddingHorizontal: 24,
-            paddingBottom: 24,
-            paddingTop: 32,
+            paddingBottom: tecladoVisible ? 0 : 16,
+            paddingTop: tecladoVisible ? 12 : 20,
           }}>
-          <Text selectable style={{ color: '#183B56', fontSize: 20, fontWeight: '700' }}>
-            Bienvenido
+          {!tecladoVisible ? <Text selectable style={{ color: '#183B56', fontSize: 20, fontWeight: '700' }}>
+            Huellas a Casa
+          </Text> : null}
+          <View style={{ alignItems: 'center', height: 165, justifyContent: 'center', marginTop: tecladoVisible ? 8 : 16, width: '100%' }}>
+            <Image source={require('../../assets/images/logo-huellas.png')} contentFit="contain" style={{ height: 165, width: 165 }} />
+          </View>
+          {!tecladoVisible ? <>
+          <Text selectable style={{ color: '#183B56', fontFamily: 'serif', fontSize: 24, fontWeight: '700', marginTop: 12, textAlign: 'center' }}>
+            Ayudemos a que vuelvan a casa.
           </Text>
+          </> : null}
         </View>
 
         {/* Formulario de inicio de sesion */}
-        <View style={{ flex: 1, justifyContent: 'flex-end', padding: 24 }}>
+        <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: tecladoVisible ? 8 : 12, paddingBottom: tecladoVisible ? 20 : 24 }}>
           {/* Cargando la sesion guardada */}
           {cargandoSesion ? <ActivityIndicator color="#183B56" /> : null}
 
@@ -101,7 +124,8 @@ export function LoginScreen() {
 
           {/* Se muestra cuando no hay una sesion */}
           {!cargandoSesion && supabase && !sesion ? (
-            <View style={{ gap: 12 }}>
+            <View style={{ flex: 1, gap: 12, justifyContent: 'flex-start' }}>
+              <Text style={{ color: colors.text, fontSize: 20, fontWeight: '700' }}>Te damos la bienvenida</Text>
               <TextInput
                 accessibilityLabel="Correo electrónico"
                 autoCapitalize="none"
@@ -143,15 +167,18 @@ export function LoginScreen() {
                 onPress={iniciarSesion}
                 style={{
                   alignItems: 'center',
-                  backgroundColor: enviando ? '#DCEAF0' : '#E9826B',
+                  backgroundColor: enviando ? '#DCEAF0' : colors.action,
                   borderRadius: 10,
+                  marginTop: tecladoVisible ? 12 : 0,
                   padding: 13,
                 }}>
-                <Text style={{ color: '#07182A', fontSize: 16, fontWeight: '600' }}>
-                  {enviando ? 'Ingresando...' : 'Ingresar'}
+                <Text style={{ color: enviando ? colors.textSecondary : colors.onAction, fontSize: 16, fontWeight: '600' }}>
+                  {enviando ? 'Ingresando...' : 'Iniciar sesión'}
                 </Text>
               </Pressable>
 
+              {!tecladoVisible ? <View style={{ alignItems: 'center', marginTop: 'auto', paddingTop: 32 }}>
+              <Text style={{ color: colors.textSecondary, marginBottom: 10 }}>¿Todavía no tenés cuenta?</Text>
               <Link href="/registro" asChild>
                 <Pressable
                   accessibilityRole="button"
@@ -161,12 +188,14 @@ export function LoginScreen() {
                     borderRadius: 10,
                     borderWidth: 1,
                     padding: 13,
+                    width: '100%',
                   }}>
                   <Text style={{ color: '#183B56', fontSize: 16, fontWeight: '600' }}>
                     Crear cuenta
                   </Text>
                 </Pressable>
               </Link>
+              </View> : null}
             </View>
           ) : null}
 
@@ -202,5 +231,6 @@ export function LoginScreen() {
         </View>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

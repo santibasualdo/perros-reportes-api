@@ -18,13 +18,16 @@ public class CoincidenciaResponse {
     private final String urlFotografiaReporteAvistamiento;
     private final OffsetDateTime fechaHoraReportePerdido;
     private final OffsetDateTime fechaHoraReporteAvistamiento;
+    private final String nombreReportePerdido;
+    private final String nombreReporteAvistamiento;
 
     public CoincidenciaResponse(UUID idCoincidencia, UUID idReportePerdido,
             UUID idReporteAvistamiento, Double similitudCaracteristicas,
             Double distancia, Double puntajeTotal, EstadoCoincidencia estado,
             OffsetDateTime creadoEn, Double similitudVisual,
             String urlFotografiaReportePerdido, String urlFotografiaReporteAvistamiento,
-            OffsetDateTime fechaHoraReportePerdido, OffsetDateTime fechaHoraReporteAvistamiento) {
+            OffsetDateTime fechaHoraReportePerdido, OffsetDateTime fechaHoraReporteAvistamiento,
+            String nombreReportePerdido, String nombreReporteAvistamiento) {
         this.idCoincidencia = idCoincidencia;
         this.idReportePerdido = idReportePerdido;
         this.idReporteAvistamiento = idReporteAvistamiento;
@@ -38,6 +41,8 @@ public class CoincidenciaResponse {
         this.urlFotografiaReporteAvistamiento = urlFotografiaReporteAvistamiento;
         this.fechaHoraReportePerdido = fechaHoraReportePerdido;
         this.fechaHoraReporteAvistamiento = fechaHoraReporteAvistamiento;
+        this.nombreReportePerdido = nombreReportePerdido;
+        this.nombreReporteAvistamiento = nombreReporteAvistamiento;
     }
 
     public UUID getIdCoincidencia() {
@@ -90,5 +95,13 @@ public class CoincidenciaResponse {
 
     public OffsetDateTime getFechaHoraReporteAvistamiento() {
         return fechaHoraReporteAvistamiento;
+    }
+
+    public String getNombreReportePerdido() {
+        return nombreReportePerdido;
+    }
+
+    public String getNombreReporteAvistamiento() {
+        return nombreReporteAvistamiento;
     }
 }
