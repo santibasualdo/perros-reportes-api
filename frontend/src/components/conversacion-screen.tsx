@@ -3,7 +3,8 @@ import { ArrowLeftIcon, PaperPlaneRightIcon } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Fragment, type ComponentRef, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/components/auth-provider';
@@ -46,7 +47,7 @@ export function ConversacionScreen({
     // Al abrir el teclado dejamos visible el mensaje mas reciente.
     const mostrar = Keyboard.addListener('keyboardDidShow', () => {
       setTecladoVisible(true);
-      requestAnimationFrame(() => listaRef.current?.scrollToEnd({ animated: false }));
+      requestAnimationFrame(() => listaRef.current?.scrollToEnd({ animated: true }));
     });
     const ocultar = Keyboard.addListener('keyboardDidHide', () => setTecladoVisible(false));
     return () => { mostrar.remove(); ocultar.remove(); };
@@ -128,8 +129,10 @@ export function ConversacionScreen({
   };
 
   return (
+    // El chat acompaña el movimiento del teclado sin mover la cabecera.
+    <KeyboardProvider>
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior="padding"
       style={{ backgroundColor: colors.reportListBackground, flex: 1 }}>
       <StatusBar style="dark" />
       {/* Parte de arriba del celular */}
@@ -292,6 +295,7 @@ export function ConversacionScreen({
       </View>
 
     </KeyboardAvoidingView>
+    </KeyboardProvider>
   );
 }
 

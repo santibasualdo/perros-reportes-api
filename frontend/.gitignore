@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# Prototipos locales
+/prototipos/
+
 # Expo
 .expo/
 dist/
